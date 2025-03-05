@@ -63,7 +63,6 @@ def get_llm_response(model: str, prompt: str, system: str = "") -> Generator[str
     if model in API_LLMS:
         return get_chatgpt_response(model, prompt, system)
     else:
-        print('using ollama')
         return get_ollama_response(model, prompt, system)
 
 def agent_conversation(
@@ -152,6 +151,7 @@ def get_available_models():
     # Add ChatGPT models
     try:
         models.extend(API_LLMS)
+        
     except Exception as e:
         print(f"Error adding ChatGPT models: {e}")
     
@@ -160,8 +160,8 @@ def get_available_models():
 def create_app():
     # Get available models when app starts
     available_models = get_available_models()
-    default_student_model = [model for model in available_models if "7b" in model][0]
-    default_tutor_model = [model for model in available_models if "9b" in model][0]
+    default_student_model = available_models[0]
+    default_tutor_model = available_models[0]
     
     with gr.Blocks(theme=gr.themes.Soft()) as demo:
         gr.Markdown("# Math Tutoring Session")
