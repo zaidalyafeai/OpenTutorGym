@@ -1,0 +1,1 @@
+FROM ./allam-7b-instruct-preview-q4_k_m.gguf

@@ -1,2 +1,7 @@
 .env
 __pycache__
+output/*
+*.gguf
+results/*
+ollama-inference.py
+optim.py
