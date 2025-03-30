@@ -191,13 +191,13 @@ def create_app():
     
     # Define math problems with their solutions
     math_problems = [
-        {"problem": "Solve for x: 2x - 5 = 11", "solution": "x = 8"},
-        {"problem": "Find the derivative of f(x) = x^3 + 2x^2 - 4x + 7", "solution": "f'(x) = 3x^2 + 4x - 4"},
-        {"problem": "Evaluate ∫(2x + 3)dx from x=1 to x=4", "solution": "24"},
-        {"problem": "If P(A) = 0.3 and P(B) = 0.5 and A and B are independent, what is P(A and B)?", "solution": "0.15"},
-        {"problem": "Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May?", "solution": "72"},
-        # in arabic {"problem": "Solve for x: 2x - 5 = 11", "solution": "x = 8"}
-        {"problem": "حل المعادلة: 2س - 5 = 11", "solution": "س = 8"},
+        {"question": "Solve for x: 2x - 5 = 11", "solution": "x = 8"},
+        {"question": "Find the derivative of f(x) = x^3 + 2x^2 - 4x + 7", "solution": "f'(x) = 3x^2 + 4x - 4"},
+        {"question": "Evaluate ∫(2x + 3)dx from x=1 to x=4", "solution": "24"},
+        {"question": "If P(A) = 0.3 and P(B) = 0.5 and A and B are independent, what is P(A and B)?", "solution": "0.15"},
+        {"question": "Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May?", "solution": "72"},
+        # in arabic {"question": "Solve for x: 2x - 5 = 11", "solution": "x = 8"}
+        {"question": "حل المعادلة: 2س - 5 = 11", "solution": "س = 8"},
     ]
     
     with gr.Blocks(theme=gr.themes.Soft()) as demo:

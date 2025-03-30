@@ -5,3 +5,5 @@ output/*
 results/*
 ollama-inference.py
 optim.py
+evaluate/results*
+evaluate/data/*
