@@ -2,6 +2,10 @@ import argparse
 from run_model_predictions import run_model_predictions
 from datasets import load_from_disk
 from dotenv import load_dotenv
+from predict import LLMPredictor
+import asyncio
+import os
+import json
 from constants import (
     DATASETS,
     SYSTEM_PROMPT_COT,
@@ -13,6 +17,22 @@ from constants import (
 )
 
 load_dotenv()
+
+def load_tutor_examples(dataset, fewshot_size):
+    examples = []
+    path = f"examples/{args.tutor_model}/qwen2.5:3b/{dataset}/train"
+    for file in os.listdir(path):
+        with open(f"{path}/{file}", "r") as f:
+            examples.append(json.load(f))
+    return examples[:fewshot_size]
+
+def load_examples(dataset, fewshot_size):
+    examples = load_from_disk(f"data/{dataset}.parquet")["train"].select(range(fewshot_size))
+    examples = examples.to_dict()
+    examples = [
+        dict(zip(examples.keys(), values)) for values in zip(*examples.values())
+    ]
+    return examples
 
 def process_questions():
     # use cache if possible
@@ -44,6 +64,8 @@ def process_questions():
                 question.pop(key)
     return questions
 
+def main():
+    asyncio.run(run_model_predictions(args))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -119,5 +141,13 @@ if __name__ == "__main__":
         SYSTEM_PROMPT = SYSTEM_PROMPT_MC_EVOLVE
     else:
         pass
+    args.predictor = LLMPredictor(mode = args.mode, student_model = args.student_model, tutor_model = args.tutor_model)
     args.system_prompt = ""
-    run_model_predictions(args)
+    args.examples = []
+    fewshot_size = int(args.mode.split(":")[1])
+    if fewshot_size > 0:
+        if "fewshot" in args.mode:
+            args.examples = load_examples(args.dataset, fewshot_size)
+        elif "tutor" in args.mode:
+            args.examples = load_tutor_examples(args.dataset, fewshot_size)
+    main()

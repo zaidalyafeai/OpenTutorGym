@@ -15,8 +15,9 @@ for data_name in DATASETS:
     if "answer" not in columns:
         data = data.rename_column(DATASETS[data_name]['a_key'], "answer")
     data = data.map(lambda x: {"id": x["id"] if "id" in x else hash_question(x["question"])})
+    if "gsm8k" in data_name:
+        data = data.map(lambda x: {"answer": x["answer"].split("####")[1].strip()})
     data.save_to_disk(f"data/{data_name}.parquet")
 
 # test load 
 data = load_from_disk(f"data/{data_name}.parquet")
-print(data)
