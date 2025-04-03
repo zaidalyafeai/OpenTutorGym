@@ -1,8 +1,8 @@
 ollama==0.4.7
-gradio==5.20.0
+gradio==4.44.0
 dotenv==0.9.9
 openai==1.65.3
 vllm==0.8.2
-
+datasets==3.5.0
 
 
