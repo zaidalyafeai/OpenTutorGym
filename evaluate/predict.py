@@ -36,7 +36,7 @@ class LLMPredictor:
     GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
     DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
     GEMINI_LLMS = ["google/gemini-flash-1.5", "google/gemini-2.0-pro-exp-02-05:free"]
-    VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct"]
+    VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
     API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS
     
     def __init__(self, mode: str = "standard", student_model: str = "gemma2:27b", tutor_model: str = "gemma2:27b"):
@@ -46,7 +46,7 @@ class LLMPredictor:
         """Initialize the LLMConversationGenerator"""
         pass 
 
-    async def get_llm_response(self, model: str, contexts: List[Dict[str, Any]]) -> str:
+    async def get_llm_response(self, model: str, contexts: List[Dict[str, Any]], port: str = "8000") -> str:
         """Get response from LLM based on model type"""
         api_key = ""
         api_base = ""
@@ -55,10 +55,10 @@ class LLMPredictor:
             api_base = "https://openrouter.ai/api/v1"
         elif model in self.VLLM_LLMS:
             api_key = "EMPTY"
-            api_base = "http://localhost:8000/v1"
+            api_base = f"http://localhost:{port}/v1"
         elif model in self.get_ollama_models():
             api_key = "ollama"
-            api_base = "http://localhost:11434/v1"
+            api_base = f"http://localhost:{port}/v1"
         else:
             raise ValueError(f"Invalid model: {model}")
         
@@ -66,9 +66,19 @@ class LLMPredictor:
             api_key=api_key,
             base_url=api_base,
         )
-        response = await asyncio.to_thread(client.chat.completions.create, model=model, messages=contexts)
-        response = response.choices[0].message.content
-        return response, contexts
+        # print(f"Using model: {model}")
+        # print(f"Request contexts: {contexts}")
+        try:
+            response = await asyncio.to_thread(
+                client.chat.completions.create, 
+                model=model, 
+                messages=contexts
+            )
+            # print(f"API Response: {response}")
+            return response.choices[0].message.content, contexts
+        except Exception as e:
+            print(f"Error during API call: {str(e)}")
+            # raise  # Re-raise the exception after logging
          
 
     async def predict_conversation(
@@ -110,14 +120,14 @@ class LLMPredictor:
         
         conversation = []
         for _ in range(max_turns):
-            response = await self.get_llm_response(self.student_model, student_messages)
+            response, _ = await self.get_llm_response(self.student_model, student_messages, port = "8000")
             if log:
                 print("Student: ", response.strip())
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
-            response = await self.get_llm_response(self.tutor_model, tutor_messages)
+            response, _ = await self.get_llm_response(self.tutor_model, tutor_messages, port = "8080")
             if log:
                 print("Tutor: ", response.strip())
             conversation.append({"role": "Tutor", "content": response})

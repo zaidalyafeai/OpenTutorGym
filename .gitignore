@@ -8,3 +8,4 @@ optim.py
 evaluate/results*
 evaluate/data/*
 evaluate/examples/*
+dcgm/

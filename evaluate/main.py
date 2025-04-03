@@ -20,7 +20,7 @@ load_dotenv()
 
 def load_tutor_examples(dataset, fewshot_size):
     examples = []
-    path = f"examples/{args.tutor_model}/qwen2.5:3b/{dataset}/train"
+    path = f"examples/{args.tutor_model}/{args.student_model}/{dataset}/train"
     for file in os.listdir(path):
         with open(f"{path}/{file}", "r") as f:
             examples.append(json.load(f))

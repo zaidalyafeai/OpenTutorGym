@@ -23,7 +23,7 @@ async def process_dataset(
 
         # Process each problem
         for i, problem in tqdm(enumerate(dataset)):
-            answer, conversation = await generator.create_conversation(
+            answer, conversation = await generator.predict_conversation(
                 problem["question"],
                 language,
                 student_level,
@@ -52,15 +52,17 @@ async def process_dataset(
                 json.dump(config, f, indent=4)
 
 async def main():
-    student_model = "gemma2:27b"
-    tutor_model = "qwen2.5:3b"
+    student_model = "Qwen/Qwen2.5-3B-Instruct"
+    tutor_model = "Qwen/Qwen2.5-7B-Instruct"
     generator = LLMPredictor(mode="tutor", student_model=student_model, tutor_model=tutor_model)
 
     await process_dataset(
         "gsm8k",
         "train",
-            generator = generator
-        )
+        generator = generator,
+        max_dataset_size=16
+
+        ),
 
 if __name__ == "__main__":
     asyncio.run(main())

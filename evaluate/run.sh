@@ -1,11 +1,11 @@
-TUTOR_MODEL="gemma2:27b"
-STUDENT_MODEL="Qwen/Qwen2.5-7B-Instruct"
-STUDENT_MODEL="gemma3:12b"
+TUTOR_MODEL="Qwen/Qwen2.5-7B-Instruct"
+STUDENT_MODEL="Qwen/Qwen2.5-3B-Instruct"
+# STUDENT_MODEL="gemma3:12b"
 JUDGE_MODEL="deepseek/deepseek-chat-v3-0324:free"
 DATASET="gsm8k"
-MODE="tutor:2"
+MODE="tutor:3"
 MAX_COMPLETION_TOKENS=8192
-NUM_WORKERS=16
+NUM_WORKERS=64
 MAX_DATASET_SIZE=128
 DIRECTORY="results"
 
