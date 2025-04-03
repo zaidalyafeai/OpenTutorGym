@@ -1,0 +1,47 @@
+{
+    "id": "e14c1b1fb9b09d49e80656fda92aba781decb27e93464a7d79f59b1a057e8e2f",
+    "question": "Noah is a painter. He paints pictures and sells them at the park. He charges $60 for a large painting and $30 for a small painting. Last month he sold eight large paintings and four small paintings. If he sold twice as much this month, how much is his sales for this month?",
+    "answer": "1200",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How much did Noah make last month from selling large paintings? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "To find out how much Noah made last month from selling large paintings, you need to multiply the number of large paintings he sold by the price per large painting. Can you calculate that? Last month, he sold eight large paintings at $60 each. What is eight times sixty?\n"
+        },
+        {
+            "role": "Student",
+            "content": "480 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Noah made $480 from selling large paintings last month. Now, let's find out how much he made from small paintings last month by multiplying the number of small paintings sold by the price per small painting. He sold four small paintings at $30 each. Can you calculate that amount?\n"
+        },
+        {
+            "role": "Student",
+            "content": "120 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! Noah made $120 from selling small paintings last month. Now, to find his total sales for last month, you need to add the money he made from large paintings and small paintings together. What is the sum of $480 (from large paintings) and $120 (from small paintings)?\n\nCan you calculate the total?\n"
+        },
+        {
+            "role": "Student",
+            "content": "600 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're absolutely right! The total sales for last month were $600 ($480 from large paintings + $120 from small paintings). Now, if Noah sold twice as much this month, we need to find out his sales for this month. To do that, you should double the total sales of last month.\n\nCan you calculate what the sales for this month would be?\n"
+        },
+        {
+            "role": "Student",
+            "content": "1200 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You calculated correctly! The sales for this month would be $1200. Well done on figuring that out!\n\nSolution: $1200\n\nCongratulations on solving the problem yourself! If you have any more questions or need further assistance, feel free to ask. <END>"
+        }
+    ]
+}

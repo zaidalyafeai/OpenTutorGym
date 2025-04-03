@@ -1,0 +1,63 @@
+{
+    "id": "586de1cf3437d243351d85d96750bffa8e0c3fe17bc48c197ee1e827078808d7",
+    "question": "A concert ticket costs $40. Mr. Benson bought 12 tickets and received a 5% discount for every ticket bought that exceeds 10. How much did Mr. Benson pay in all?",
+    "answer": "476",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many tickets did Mr. Benson buy that qualify for the discount? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great question! If Mr. Benson bought 12 tickets, how many of those exceed 10 and would therefore be eligible for the discount?"
+        },
+        {
+            "role": "Student",
+            "content": "So, he bought 2 tickets that are eligible for the discount. Is that correct?  \n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! Since Mr. Benson bought 12 tickets in total, 2 of them (the ones bought above the 10th ticket) would be eligible for the discount. Now, how much does each of these 2 discounted tickets cost? Remember, he gets a 5% discount on these 2 tickets."
+        },
+        {
+            "role": "Student",
+            "content": "So I need to calculate 5% of $40 and subtract it from the original price.  \n\nIs that correct?  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Exactly right! You need to calculate 5% of $40 to find out how much the discount is for each discounted ticket, and then subtract that from the original price of $40. What do you get when you calculate 5% of $40?"
+        },
+        {
+            "role": "Student",
+            "content": "5% of $40 is $2.  \n\nSo, does this mean each discounted ticket costs $38?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! When you take 5% off the original price of $40, you get a discount of $2. So, each discounted ticket would cost $40 - $2 = $38. \n\nNow, since Mr. Benson bought 2 tickets that are eligible for this discount, do you see how much he paid in total for these 2 discounted tickets? Remember to calculate the total by multiplying the discounted price by 2."
+        },
+        {
+            "role": "Student",
+            "content": "The 2 discounted tickets cost a total of $76.  \n\nNow I need to figure out the cost of the other 10 tickets, which were not discounted.\n\nIs that right?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You've figured it out so far. Mr. Benson bought 10 tickets at the full price and 2 tickets at the discounted price. Now you need to calculate how much he paid for those 10 full-price tickets. Since each of these tickets costs $40, do you know how much he spent on them in total?\n\nRemember to multiply the number of full-price tickets by the price per ticket.\n\nLet's figure that out together!"
+        },
+        {
+            "role": "Student",
+            "content": "He paid $400 for the 10 full-price tickets.   \n\n\n\nNow I can add up the cost of all the tickets.  Is that right?"
+        },
+        {
+            "role": "Tutor",
+            "content": "That sounds like you're on the right track! You've correctly calculated that Mr. Benson paid $400 for the 10 full-price tickets. Now, to find the total amount he paid for all 12 tickets, do you just need to add the cost of the discounted tickets ($76) to the cost of the full-price tickets ($400)?\n\nLet's calculate that together: $400 (for the full-price tickets) + $76 (for the discounted tickets). \n\nWhat do you get when you add these amounts?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 476 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! You've calculated it correctly. Mr. Benson paid a total of $476 for all 12 concert tickets.\n\nTo verify, let's check the math:\n\n- He bought 10 full-price tickets at $40 each: \\(10 \\times 40 = 400\\)\n- He bought 2 discounted tickets at $38 each (5% off of $40): \\(2 \\times 38 = 76\\)\n\nAdding these together: \\(400 + 76 = 476\\).\n\nSo, your solution is correct! Well done. If you have any more questions or need further assistance, feel free to ask. You've got this! \n\n<END>"
+        }
+    ]
+}

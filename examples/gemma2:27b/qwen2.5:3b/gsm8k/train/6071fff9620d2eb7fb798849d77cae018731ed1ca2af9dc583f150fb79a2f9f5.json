@@ -1,0 +1,47 @@
+{
+    "id": "6071fff9620d2eb7fb798849d77cae018731ed1ca2af9dc583f150fb79a2f9f5",
+    "question": "Ann, Bill, Cate, and Dale each buy personal pan pizzas cut into 4 pieces. If Bill and Dale eat 50% of their pizzas and Ann and Cate eat 75% of the pizzas, how many pizza pieces are left uneaten?",
+    "answer": "6",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many pieces does each person start with?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Each person starts with a personal pan pizza cut into 4 pieces. Can you determine how many pieces each has initially based on this information?"
+        },
+        {
+            "role": "Student",
+            "content": "So, each person has 4 pieces to begin with. \n\nCould you give me a hint about how to figure out how many pieces Bill and Dale eat? \n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Sure! Since Bill and Dale each have one pizza that is cut into 4 pieces and they eat 50% of their pizzas, how many pieces do you think they eat together?"
+        },
+        {
+            "role": "Student",
+            "content": "If they eat 50% of their pizzas, and each pizza has 4 slices, they each eat 2 pieces (half of 4).  \n\nSince there are two of them, they eat a total of 4 pieces.\n\nHow can I figure out how many pieces Ann and Cate eat together? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job figuring out that Bill and Dale eat 4 pieces in total. Now, if Ann and Cate each have one pizza cut into 4 pieces and they eat 75% of their pizzas, how many pieces do you think they eat together? Remember to calculate for both Ann and Cate."
+        },
+        {
+            "role": "Student",
+            "content": "If they eat 75%, that means they eat 3 out of every 4 slices (3/4 * 4 = 3).\n\nSo, together they eat 6 pieces.  \n\nWhat should I do next to find the total number of uneaten pieces?"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing well so far! Now that you know Bill and Dale ate 4 pieces and Ann and Cate ate 6 pieces, how many pieces are there in total from all four pizzas? After finding this out, what can you do to determine how many pieces are left uneaten? Can you calculate it now?"
+        },
+        {
+            "role": "Student",
+            "content": "There are a total of 16 pieces (4 people * 4 pieces per person).\n\nIf they ate a total of 10 pieces (4 + 6), then 6 pieces are left uneaten.  \n\n\n\nSolution: 6"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've calculated it correctly! Let's verify the steps:\n\n- Each person starts with 4 pizza slices, so there are \\( 4 \\times 4 = 16 \\) slices in total.\n- Bill and Dale eat 4 pieces (50% of their pizzas).\n- Ann and Cate eat 6 pieces (75% of their pizzas).\n\nAdding the pieces they ate: \\( 4 + 6 = 10 \\) pieces.\n\nTherefore, the number of uneaten pieces is:\n\\[ 16 - 10 = 6 \\]\n\nYour solution is correct! Well done!\n\n<END>"
+        }
+    ]
+}

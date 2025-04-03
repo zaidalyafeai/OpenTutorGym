@@ -1,0 +1,39 @@
+{
+    "id": "7d853eb36f152f932aa64af3d2a8247f4cc8fc5d0157d8826427c84b9a5f508d",
+    "question": "The profit from a business transaction is shared among 2 business partners, Mike and Johnson in the ratio 2:5 respectively. If Johnson got $2500, how much will Mike have after spending some of his share on a shirt that costs $200?",
+    "answer": "800",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "What is the meaning of the ratio 2:5?  How can I use it to find out Mike's initial profit share? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great question! The ratio 2:5 means for every $7 (which is the total parts of the ratio added together, i.e., 2 + 5 = 7), Mike gets $2 and Johnson gets $5. If Johnson got $2500, how much was his share in terms of the total profit? Can you figure out what one part of the ratio (which is $7) equals in dollars?"
+        },
+        {
+            "role": "Student",
+            "content": "If Johnson got $2500 and his share is 5 parts of the ratio, then one part of the ratio is equal to $500 ($2500 / 5 = $500).\n\nHow can I find Mike's initial profit share using this information?"
+        },
+        {
+            "role": "Tutor",
+            "content": "You found out that one part of the ratio is worth $500. Since Mike\u2019s share in the ratio is 2 parts, you can calculate his initial profit by multiplying $500 by 2. What number do you get when you multiply $500 by 2?"
+        },
+        {
+            "role": "Student",
+            "content": "Mike's initial profit share is $1000 ($500 x 2 = $1000).\n\nAfter spending $200 on a shirt, how much will Mike have left?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You correctly calculated that Mike\u2019s initial profit share was $1000. If he spends $200 on a shirt, you can find out how much money he has left by subtracting $200 from his initial profit. What number do you get when you subtract $200 from $1000?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 800"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! Mike will have $800 left after spending $200 on the shirt. \n\nTo verify, let's see if everything checks out:\n\n- The ratio is 2:5, and Johnson\u2019s share (5 parts) was $2500.\n- Each part of the ratio is worth $500 ($2500 \u00f7 5).\n- Mike\u2019s share (2 parts) would be $1000 ($500 \u00d7 2).\n\nAfter spending $200 on a shirt:\n- Mike's initial profit: $1000\n- After spending $200: $800\n\nSo, your solution is correct! Well done.\n\n<END>"
+        }
+    ]
+}

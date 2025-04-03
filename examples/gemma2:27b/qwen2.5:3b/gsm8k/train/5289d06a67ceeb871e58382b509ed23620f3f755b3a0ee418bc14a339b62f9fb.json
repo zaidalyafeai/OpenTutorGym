@@ -1,0 +1,39 @@
+{
+    "id": "5289d06a67ceeb871e58382b509ed23620f3f755b3a0ee418bc14a339b62f9fb",
+    "question": "Tina makes $18.00 an hour.  If she works more than 8 hours per shift, she is eligible for overtime, which is paid by your hourly wage + 1/2 your hourly wage.  If she works 10 hours every day for 5 days, how much money does she make?",
+    "answer": "990",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many hours of overtime does Tina work each day? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Tina works a total of 10 hours each day. Since her regular shift is considered to be 8 hours, how many hours are considered overtime per day?"
+        },
+        {
+            "role": "Student",
+            "content": "So she works 2 hours of overtime each day? \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job identifying that Tina works 2 hours of overtime each day. Now, let's figure out the total amount of money she makes in one day with this information. Can you think about how much her regular pay and overtime pay would be separately? Remember, regular pay is at her normal hourly rate, and overtime pay includes an extra half-hour pay for those additional hours.\n"
+        },
+        {
+            "role": "Student",
+            "content": "For her regular 8 hours, she makes $18.00/hour * 8 hours = $144.00.\n\nAnd her overtime rate is $18.00 + ($18.00 / 2) = $27.00 per hour.  \n\nSo for her 2 hours of overtime, she makes $27.00/hour * 2 hours = $54.00 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Now you have calculated that Tina makes $144.00 for her regular 8 hours and $54.00 for her 2 hours of overtime in one day. \n\nTo find out how much she makes in total over 5 days, just add up the daily totals. Can you do this calculation? Remember to include both her regular pay and her overtime pay from each day."
+        },
+        {
+            "role": "Student",
+            "content": "Her total daily earnings are $144.00 + $54.00 = $198.00\n\nOver 5 days, she makes $198.00/day * 5 days = $990.00 \n\n\nSolution: 990"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done a great job working through the problem step-by-step! Let's verify your final calculation:\n\n- Daily earnings (regular + overtime): \\( \\$144.00 + \\$54.00 = \\$198.00 \\)\n- Over 5 days: \\( \\$198.00/day * 5 \\text{ days} = \\$990.00 \\)\n\nYour solution is correct! Well done!\n\n<END>"
+        }
+    ]
+}

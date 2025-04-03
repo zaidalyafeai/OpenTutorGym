@@ -1,0 +1,55 @@
+{
+    "id": "d5297cb00f5b0c42b419f768a3f7fb77c6044a6b632f5e29bbeb48fd9d1316e7",
+    "question": "Five friends eat at a fast-food chain and order the following: 5 pieces of hamburger that cost $3 each; 4 sets of French fries that cost $1.20; 5 cups of soda that cost $0.5 each; and 1 platter of spaghetti that cost $2.7. How much will each of them pay if they will split the bill equally?",
+    "answer": "5",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "Can you give me a hint on how to calculate the total cost of the meal? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Sure! First, let's find out how much the hamburgers cost together by multiplying the number of hamburgers by the cost per hamburger. Do you remember how to do that calculation?"
+        },
+        {
+            "role": "Student",
+            "content": "Yes, I remember!\n\nThe hamburgers cost $3 each and they ordered 5 hamburgers, so the total cost of hamburgers is 3 * 5 = $15\n\n\nWhat should I calculate next?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job with calculating the cost of the hamburgers! Now, let's move on to the French fries. The French fries cost $1.20 each and they ordered 4 sets. Can you find out how much this will be in total? Remember to multiply the number of items by the price per item."
+        },
+        {
+            "role": "Student",
+            "content": "Okay, so 4 sets of French Fries * $1.20 per set = $4.80\n\n\n\nWhat's next?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done well so far! Now that you have the total cost for the hamburgers and the French fries, let's move on to the soda cups. The soda costs $0.5 each and they ordered 5 cups. Can you calculate how much the sodas will cost in total?"
+        },
+        {
+            "role": "Student",
+            "content": "The soda cost $0.50 per cup and they got 5 cups, so the total cost is $0.50 * 5 = $2.50\n\n\n\nAnything else I need to do before figuring out the total cost?\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing great! Now that you have the costs for hamburgers, French fries, and soda, let's add up all these amounts to find the total bill. Then, we'll divide this total by 5 to see how much each friend needs to pay. Are you ready to calculate the total cost?"
+        },
+        {
+            "role": "Student",
+            "content": "Okay!\n\nThe hamburgers cost $15.00.\n\nThe French Fries cost $4.80.\n\nAnd the Soda cost $2.50.\n\n\nSo,  $15.00 + $4.80 + $2.50 = $22.30\n\nWhat do I do with $22.30 now?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've calculated the total cost of the hamburgers, French fries, and soda correctly! Now you have the subtotal which is $22.30. To find out how much each friend needs to pay, we need to divide this total by 5. Can you do that division? If not, let's break it down step by step: first, divide $22.30 by 5."
+        },
+        {
+            "role": "Student",
+            "content": "$22.30 / 5 = $4.46\n\n\n\nSolution: 4.46 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've divided $22.30 by 5 correctly! Your calculation shows that each friend needs to pay $4.46.\n\nTo verify the solution:\n\\[ \\frac{15 + 4.80 + 2.50}{5} = \\frac{22.30}{5} = 4.46 \\]\n\nSo, your solution is correct! Each of them will pay $4.46 if they split the bill equally.\n\nGreat job working through this problem step by step!\n\n<END>"
+        }
+    ]
+}

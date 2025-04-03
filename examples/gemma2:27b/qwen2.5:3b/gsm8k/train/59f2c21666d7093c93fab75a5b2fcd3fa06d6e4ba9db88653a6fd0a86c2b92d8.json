@@ -1,0 +1,39 @@
+{
+    "id": "59f2c21666d7093c93fab75a5b2fcd3fa06d6e4ba9db88653a6fd0a86c2b92d8",
+    "question": "James spends 40 years teaching.  His partner has been teaching for 10 years less.  How long is their combined experience?",
+    "answer": "70",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many years has James's partner been teaching? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Think about how you can find the answer by subtracting 10 from the number of years James has taught. What do you get?"
+        },
+        {
+            "role": "Student",
+            "content": "If I subtract 10 years from James's 40 years, I get 30 years. Is that right?  \n\nHow can we figure out their combined experience now?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job figuring out that James's partner has been teaching for 30 years. Now think about adding the number of years both have taught together. What do you add to find their combined experience?"
+        },
+        {
+            "role": "Student",
+            "content": "So I need to add James's 40 years of experience to his partner's 30 years of experience.  \n\nIs that right?\n\n\n\nWhat do I get when I add those two numbers together? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That sounds correct! Now add the number of years James has taught (40) to the number of years his partner has taught (30). What do you get as a total?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 70 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Let's add it up: \n\nJames has taught for 40 years.\nHis partner has taught for 30 years.\n\nTogether, they have taught for \\( 40 + 30 = 70 \\) years.\n\nGreat job! You found the correct combined experience. Your solution is right.\n\n<END>"
+        }
+    ]
+}

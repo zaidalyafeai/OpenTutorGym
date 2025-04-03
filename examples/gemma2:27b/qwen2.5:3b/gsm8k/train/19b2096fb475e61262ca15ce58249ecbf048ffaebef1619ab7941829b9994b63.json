@@ -1,0 +1,39 @@
+{
+    "id": "19b2096fb475e61262ca15ce58249ecbf048ffaebef1619ab7941829b9994b63",
+    "question": "Leo's assignment was divided into three parts. He finished the first part of his assignment in 25 minutes. It took him twice as long to finish the second part. If he was able to finish his assignment in 2 hours, how many minutes did Leo finish the third part of the assignment?",
+    "answer": "45",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How long did it take Leo to finish the second part of the assignment?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "It took Leo twice as long to finish the second part compared to the first part. Can you figure out how many minutes that is based on the time taken for the first part?"
+        },
+        {
+            "role": "Student",
+            "content": "So, the second part took 25 minutes * 2 = 50 minutes. \n\n\n\nHow do I find the total time Leo spent on the first and second parts?"
+        },
+        {
+            "role": "Tutor",
+            "content": "To find the total time spent on the first and second parts combined, you need to add the time taken for each of these parts together. Can you calculate that now? Remember, the first part took 25 minutes and the second part took 50 minutes."
+        },
+        {
+            "role": "Student",
+            "content": "The first and second parts together took 25 minutes + 50 minutes = 75 minutes.\n\n\n\nHow much time in minutes is equal to two hours?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Two hours converted into minutes would be 120 minutes (since there are 60 minutes in an hour, so 2 x 60 = 120). We know Leo spent a total of 120 minutes on his entire assignment. If he spent 75 minutes on the first and second parts combined, how much time did he spend on the third part?"
+        },
+        {
+            "role": "Student",
+            "content": "Leo spent 120 minutes - 75 minutes = 45 minutes on the third part.\n\n\n\nSolution: 45 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Leo finished the third part of his assignment in 45 minutes. \n\nWell done! You've solved this problem very well.\n\n<END>"
+        }
+    ]
+}

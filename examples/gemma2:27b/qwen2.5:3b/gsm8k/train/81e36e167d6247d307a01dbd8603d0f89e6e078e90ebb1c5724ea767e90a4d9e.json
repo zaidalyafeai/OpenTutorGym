@@ -1,0 +1,31 @@
+{
+    "id": "81e36e167d6247d307a01dbd8603d0f89e6e078e90ebb1c5724ea767e90a4d9e",
+    "question": "A car is driving through a tunnel with many turns. After a while, the car must travel through a ring that requires a total of 4 right-hand turns. After the 1st turn, it travels 5 meters. After the 2nd turn, it travels 8 meters. After the 3rd turn, it travels a little further and at the 4th turn, it immediately exits the tunnel. If the car has driven a total of 23 meters around the ring, how far did it have to travel after the 3rd turn?",
+    "answer": "10",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How can I figure out how far the car traveled after the third turn?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great question! Let's think about it step by step. You know the total distance the car has driven around the ring is 23 meters. After the 1st and 2nd turns, the car has driven a certain amount. The car then travels a bit more after the 3rd turn before exiting at the 4th turn. Can you figure out how much it traveled after the 3rd turn by subtracting what you know from the total distance?"
+        },
+        {
+            "role": "Student",
+            "content": "So I need to subtract the distances travelled after the first two turns from the total distance, right?  \n\nWould it be 23 - 5 - 8 = ?  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Exactly! You're on the right track. If we subtract the distances traveled after the 1st and 2nd turns from the total distance, you should get the distance traveled after the 3rd turn. Let's do that calculation:\n\n\\[ 23 - (5 + 8) = ? \\]\n\nNow, let's solve it.\nWhat do you get when you subtract these numbers?"
+        },
+        {
+            "role": "Student",
+            "content": "23 - (5 + 8) = 23 - 13 = 10\n\n\nSolution: 10"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! You've calculated correctly. The car had to travel \\(10\\) meters after the third turn.\n\nTo verify, let's check:\n\n- After the 1st turn: \\(5\\) meters\n- After the 2nd turn: \\(8\\) meters\n- Distance after the 3rd turn and before exiting: \\(10\\) meters\n\nAdding these together gives:\n\\[ 5 + 8 + 10 = 23 \\]\n\nThis matches the total distance of 23 meters driven around the ring. Well done!\n\nYou've solved this problem correctly! If you have any more questions or need further explanations, feel free to ask. Otherwise, we can end the conversation here.\nSolution: 10  \n<END>"
+        }
+    ]
+}

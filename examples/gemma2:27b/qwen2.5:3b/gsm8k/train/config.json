@@ -1,0 +1,6 @@
+{
+    "student_model": "gemma2:27b",
+    "tutor_model": "qwen2.5:3b",
+    "language": "English",
+    "student_level": "Middle School"
+}

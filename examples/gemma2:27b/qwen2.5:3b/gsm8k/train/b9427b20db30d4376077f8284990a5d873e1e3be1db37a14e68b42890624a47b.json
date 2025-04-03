@@ -1,0 +1,39 @@
+{
+    "id": "b9427b20db30d4376077f8284990a5d873e1e3be1db37a14e68b42890624a47b",
+    "question": "At a flea market, Hillary sells handmade crafts for 12 dollars per craft. Today, Hillary sells 3 crafts and is given an extra 7 dollars from an appreciative customer. Later on, Hillary deposits 18 dollars from today's profits into her bank account. How many dollars is Hillary left with after making the deposit?",
+    "answer": "25",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How much money did Hillary make from selling her crafts? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Hillary sells each craft for $12 and she sold 3 crafts today. Can you find out how much money she made from these sales?"
+        },
+        {
+            "role": "Student",
+            "content": "So, she made $12 x 3 = $36.  Is that right? \n\nHow much money did Hillary have total before making the deposit?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing great so far! Now, let's think about how much money Hillary had in total after selling her crafts and receiving extra money from an appreciative customer. Can you add up these amounts to find out how much she had total? Remember, she also received $7 as a bonus."
+        },
+        {
+            "role": "Student",
+            "content": "Okay, so she made $36 from her crafts + $7 from the customer = $43 total before the deposit. \n\nHow much money is Hillary left with after making the $18 deposit?  \n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing well! Now, let's think about how much money Hillary has after giving $18 to her bank account. Can you subtract $18 from $43 to find out how much she has left?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 25 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You found that after making the deposit, Hillary is left with $25.\n\nGreat job solving this problem step by step!\n\n<END>"
+        }
+    ]
+}

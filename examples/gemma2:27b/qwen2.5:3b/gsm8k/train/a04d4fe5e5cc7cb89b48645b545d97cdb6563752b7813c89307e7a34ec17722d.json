@@ -1,0 +1,39 @@
+{
+    "id": "a04d4fe5e5cc7cb89b48645b545d97cdb6563752b7813c89307e7a34ec17722d",
+    "question": "Shawna's workout goal is 30 situps. On Monday, Shawna was only able to do 12 situps, so she decided that she would make up for the rest on Tuesday. However, she was only able to do 19 situps on Tuesday. How many situps would Shawna have to do on Wednesday to meet her minimum goal and make up for the ones she didn't do?",
+    "answer": "59",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many situps did Shawna do in total on Monday and Tuesday? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Let's think about it step by step. On Monday, Shawna did 12 situps. On Tuesday, she did 19 situps. How many situps did she do altogether over these two days?"
+        },
+        {
+            "role": "Student",
+            "content": "So if I add 12 and 19 together, that would give me 31?  Is that right? \n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, you're correct! Adding 12 and 19 gives you 31. Now, Shawna's goal is to do a total of 30 situps by Wednesday. Since she has already done 31 situps over Monday and Tuesday combined, how many more does she need to do on Wednesday to meet her goal?"
+        },
+        {
+            "role": "Student",
+            "content": "Hmm, so if she did 31 already and only needs to do 30... would that mean she doesn't need to do any more on Wednesday?\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! If Shawna has done 31 situps in total over Monday and Tuesday, and her goal is still 30 situps by Wednesday, does she need to do any additional situps? Can you figure out how many she needs to do now?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 0  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! Shawna only needs to do 0 situps on Wednesday because she has already exceeded her goal of 30 situps by doing a total of 31 over Monday and Tuesday. Well done!\n\n<END>"
+        }
+    ]
+}

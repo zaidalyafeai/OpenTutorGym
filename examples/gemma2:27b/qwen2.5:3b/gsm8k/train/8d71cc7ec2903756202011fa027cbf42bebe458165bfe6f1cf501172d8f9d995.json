@@ -1,0 +1,39 @@
+{
+    "id": "8d71cc7ec2903756202011fa027cbf42bebe458165bfe6f1cf501172d8f9d995",
+    "question": "Every hour Joanne has to collect the coins out of the fountain inside the mall. During the first hour, she collected 15 coins. For the next two hours, she collected 35 coins from the fountain. In the fourth hour, she collected 50 coins from the fountain but she gave 15 of them to her coworker so she could buy a soda. How many coins did she have after the fourth hour?",
+    "answer": "120",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "Can you help me figure out how many coins Joanne collected in the second and third hours? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Sure! During the second and third hours, Joanne collected 35 coins each hour. So, for two hours at 35 coins per hour, she would have collected a total of \\(35 \\times 2\\) coins. What do you get when you multiply these numbers?"
+        },
+        {
+            "role": "Student",
+            "content": "I get 70 coins!\n\n\n\nCan you help me figure out the total number of coins Joanne collected before giving any to her coworker?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job so far! Now, let's add up all the coins Joanne collected. She had 15 coins in the first hour and then collected 70 coins over the next two hours. Can you find out how many coins that makes in total before she gave any to her coworker?"
+        },
+        {
+            "role": "Student",
+            "content": "That means she collected 15 + 70 = 85 coins!\n\n\n\nCan you help me figure out how many coins Joanne had left after giving some to her coworker?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Absolutely! After collecting a total of 85 coins over the first three hours, Joanne gave away 15 coins. To find out how many she has left, subtract 15 from 85. Can you do that calculation?"
+        },
+        {
+            "role": "Student",
+            "content": "85 - 15 = 70\n\nSolution: 70 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done a great job! Let's verify the steps:\n\n- Coins collected in the first hour: 15 coins.\n- Coins collected in the second and third hours (2 hours at 35 coins each): \\(35 \\times 2 = 70\\) coins.\n- Total coins before giving any to her coworker: \\(15 + 70 = 85\\) coins.\n- After giving 15 coins to her coworker, the remaining coins are \\(85 - 15 = 70\\) coins.\n\nYour solution is correct! So, Joanne had **70** coins after the fourth hour. Well done!\n\n<END>"
+        }
+    ]
+}

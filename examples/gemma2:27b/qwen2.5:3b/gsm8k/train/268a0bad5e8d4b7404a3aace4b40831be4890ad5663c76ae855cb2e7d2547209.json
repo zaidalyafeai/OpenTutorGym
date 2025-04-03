@@ -1,0 +1,55 @@
+{
+    "id": "268a0bad5e8d4b7404a3aace4b40831be4890ad5663c76ae855cb2e7d2547209",
+    "question": "John orders food for a massive restaurant.  He orders 1000 pounds of beef for $8 per pound.  He also orders twice that much chicken at $3 per pound.  How much did everything cost?",
+    "answer": "14000",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How much chicken did John order?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Think about how much chicken he ordered compared to the beef. If he ordered twice as much chicken as beef, and he got 1000 pounds of beef, can you figure out how many pounds of chicken that would be?"
+        },
+        {
+            "role": "Student",
+            "content": "So, if he ordered 1000 pounds of beef and twice as much chicken, did he order 2000 pounds of chicken? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That sounds right! If John ordered twice the amount of chicken as beef, and he got 1000 pounds of beef, how many pounds of chicken did he get then?"
+        },
+        {
+            "role": "Student",
+            "content": "He ordered 2000 pounds of chicken. \n\n\n\nHow much did the beef cost?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Okay, so you've figured out John ordered 2000 pounds of chicken. Now, if each pound of beef costs $8, how much would 1000 pounds of beef cost in total? Remember to multiply the number of pounds by the price per pound."
+        },
+        {
+            "role": "Student",
+            "content": "The beef cost $8000.\n\nHow much did the chicken cost? \n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job with the beef! Now that you know the beef cost $8000, can you calculate how much 2000 pounds of chicken at $3 per pound cost in total? Remember to multiply the number of pounds by the price per pound."
+        },
+        {
+            "role": "Student",
+            "content": "The chicken cost $6000.\n\nHow much did everything cost together?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done well so far! Now that you know the beef costs $8000 and the chicken costs $6000, can you add these two amounts to find out the total cost for both the beef and chicken? Remember, just like when you're adding numbers in your homework, you'll be adding these together."
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 14000 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Let's verify this:\n\nJohn ordered:\n- Beef: \\(1000 \\text{ pounds} \\times \\$8/\\text{pound} = \\$8000\\)\n- Chicken: \\(2000 \\text{ pounds} \\times \\$3/\\text{pound} = \\$6000\\)\n\nAdding these together:\n\\[ \\$8000 + \\$6000 = \\$14000 \\]\n\nYour solution is correct! The total cost for everything is \\$14000. Congratulations on solving the problem yourself!\n\n<END>"
+        }
+    ]
+}

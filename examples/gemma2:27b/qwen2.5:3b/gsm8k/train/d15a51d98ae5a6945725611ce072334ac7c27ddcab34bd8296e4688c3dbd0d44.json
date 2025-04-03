@@ -1,0 +1,63 @@
+{
+    "id": "d15a51d98ae5a6945725611ce072334ac7c27ddcab34bd8296e4688c3dbd0d44",
+    "question": "It's Ava's birthday party. Her parents bought a unicorn pi\u00f1ata for $13 and filled it with all of her favorite treats. They bought 4 bags of Reese's for $9 per bag, 3 bags of Snickers for $5 per bag, and 5 bags of Skittles for $7 per bag. How much did the unicorn pi\u00f1ata and the treats cost altogether?",
+    "answer": "99",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How do I calculate the total cost of the Reese's?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great question! To find out how much the Reese's cost in total, you need to multiply the number of bags by the price per bag. Can you try calculating it now? The numbers are 4 bags at $9 each.\n"
+        },
+        {
+            "role": "Student",
+            "content": "So, 4 bags * $9/bag = $36.  Is that right?\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Exactly right! You multiplied 4 by 9 to get $36. Now, you need to do the same for the Snickers and Skittles. How much did the 3 bags of Snickers cost? And how about the 5 bags of Skittles?\nRemember to multiply the number of bags by the price per bag for each type of treat.\n"
+        },
+        {
+            "role": "Student",
+            "content": "Okay, so 3 bags of Snickers at $5/bag is 3 * $5 = $15.\n\nAnd 5 bags of Skittles at $7/bag is 5 * $7 = $35.\n\nDid I get those right?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, you got it correct! You've found that the 3 bags of Snickers cost $15 and the 5 bags of Skittles cost $35. Now, to find the total cost of all the treats, you need to add up the costs of the Reese's, Snickers, and Skittles together with the cost of the unicorn pi\u00f1ata.\n\nCan you calculate the total by adding these amounts? Start from the total of the Reese's ($36), then add the cost of the Snickers and Skittles. Finally, add that to the $13 for the pi\u00f1ata.\nDo you want to do this calculation together or are you ready to find out the total?\n"
+        },
+        {
+            "role": "Student",
+            "content": "I can do it!\n\n$36 (Reese's) + $15 (Snickers) + $35 (Skittles) + $13 (Pi\u00f1ata) = $99 \n\n\nSolution: 99"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done a great job! The total cost of the unicorn pi\u00f1ata and all the treats together is $99. \n\nCongratulations on solving the problem correctly!\n\nEND"
+        },
+        {
+            "role": "Student",
+            "content": "Yay!  I was able to do it!\n\nThanks for helping me!"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! It's wonderful to see you figuring out the solution step by step. If you have any more questions or need further help, feel free to ask. Keep up the good work! Have a great day!\nEND"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks! I will!  Have a good one too!\n\nEND"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! Have a great day ahead! Don't hesitate to reach out if you have more questions or need help in the future. Take care and goodbye!\nEND"
+        },
+        {
+            "role": "Student",
+            "content": "Goodbye! \n\nEND"
+        },
+        {
+            "role": "Tutor",
+            "content": "Solution: 99\nEND\n\nIt seems there is an error in your solution format. The correct response should not include a \"Solution\" header since the question asked for hints, not a direct solution. I've used <END> to conclude the conversation as requested.\n\nGoodbye!\nEND"
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "id": "e5f5cc99bb3034876167b87ea9930b56f481c28ca6f650cd49dc894fe2dada57",
+    "question": "Tim has 30 less apples than Martha, and Harry has half as many apples as Tim. If Martha has 68 apples, how many apples does Harry have?",
+    "answer": "19",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many apples does Tim have? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Let's think about this step by step. If Martha has 68 apples and Tim has 30 less than that, how many apples does Tim have? Remember to subtract 30 from the number of apples Martha has. What do you get?"
+        },
+        {
+            "role": "Student",
+            "content": "38 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! You correctly calculated that Tim has 38 apples. Now, since Harry has half as many apples as Tim, how many apples does Harry have? Remember to divide the number of apples Tim has by 2. Can you find out how many apples Harry has now?"
+        },
+        {
+            "role": "Student",
+            "content": "19"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You've figured out that Harry has 19 apples. Well done on working through this problem step by step.\n\nIf you have any more questions or need further guidance, feel free to ask. Great work solving the problem yourself!"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 19"
+        },
+        {
+            "role": "Tutor",
+            "content": "Solution: 19 \n\nYou are correct! Harry has 19 apples.\n\nGreat job on figuring this out all by yourself. You've done well in working through the steps and using the information provided to reach the right answer. Keep up the good work!\n\n<END>"
+        }
+    ]
+}

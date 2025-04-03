@@ -1,0 +1,39 @@
+{
+    "id": "6b38dbe3846d6ea806b784af75178b70946202c834586a4ff7ecf3fbfa337ffd",
+    "question": "Samantha\u2019s last name has three fewer letters than Bobbie\u2019s last name. If Bobbie took two letters off her last name, she would have a last name twice the length of Jamie\u2019s. Jamie\u2019s full name is Jamie Grey. How many letters are in Samantha\u2019s last name?",
+    "answer": "7",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many letters are in Jamie's last name?  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Let's think about this step by step. If Jamie's full name is Jamie Grey, how many letters does her last name have? Remember to count each letter carefully."
+        },
+        {
+            "role": "Student",
+            "content": "Jamie's last name has four letters. \nCan you give me a hint on how to figure out the length of Bobbie's last name?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job figuring out that Jamie\u2019s last name has four letters! Now, if we know that if Bobbie took two letters off her last name, she would have a last name twice as long as Jamie\u2019s, how many letters did Bobbie originally have in her last name before taking away the two?"
+        },
+        {
+            "role": "Student",
+            "content": "Since Jamie's last name is 4 letters long and Bobbie's would be twice that length if she took off two letters, that means Bobbie's last name is (4 * 2) + 2 = 10 letters long.\n\nCould you give me a hint on how to figure out Samantha's last name length?"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done well so far! Now, remember that Samantha\u2019s last name has three fewer letters than Bobbie\u2019s last name. If we know Bobbie\u2019s last name is 10 letters long, can you figure out how many letters are in Samantha\u2019s last name by subtracting three from the number of letters in Bobbie's last name?"
+        },
+        {
+            "role": "Student",
+            "content": "Samantha's last name has 7 letters.\n\nSolution: 7 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You've found that Samantha's last name has 7 letters. Well done on solving this problem step by step!\n\nTo confirm, if we subtract three from the ten letters in Bobbie\u2019s last name (which is twice Jamie\u2019s four-letter last name), we get seven letters for Samantha.\n\nGreat job figuring it out! If you have any more questions or need further assistance, feel free to ask. You've done very well following through with this problem!\n\n<END>"
+        }
+    ]
+}

@@ -1,0 +1,167 @@
+{
+    "id": "f86e67113f1ec566d9845d865c6bb71530e0863dfcd78e05fe1e7dcd21e40830",
+    "question": "A Statistics student wants to find out the average daily allowance of the middle school students. According to his survey, 2/3 of the students receive an average of $6 allowance per day while the rest gets an average of $4 a day. If he surveyed 60 students, what is the total amount of money those 60 students get in a day?",
+    "answer": "320",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many students receive $6 per day? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "To find out how many students receive $6 per day, you need to calculate 2/3 of the total number of students surveyed. Since he surveyed 60 students, can you work out how many that is?"
+        },
+        {
+            "role": "Student",
+            "content": "Is it (2/3) * 60 = 40 students? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You've calculated that 40 students receive $6 per day. Now, let's find out how many students get $4 per day. Can you figure that out using the total number of students and the number who get $6 per day?"
+        },
+        {
+            "role": "Student",
+            "content": "So, if 40 students get $6, then  60 - 40 = 20 students get $4? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, you've done it! So now you know that 20 students receive $4 per day. To find the total amount of money those 60 students get in a day, what do you think we need to do next? Can you calculate the total by considering both groups of students and their average allowances?"
+        },
+        {
+            "role": "Student",
+            "content": "Okay, so for the $6 group: 40 students * $6/student = $240.\n\nAnd for the $4 group: 20 students * $4/student = $80. \n\nDo we add those amounts together to get the total?"
+        },
+        {
+            "role": "Tutor",
+            "content": "Exactly! You've calculated that the 40 students who receive $6 per day contribute a total of $240, and the 20 students who receive $4 per day contribute a total of $80. To find the total amount of money those 60 students get in a day, you need to add these two amounts together. Can you do that calculation now?"
+        },
+        {
+            "role": "Student",
+            "content": "$240 + $80 = $320\n\nSolution: 320"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've calculated correctly! The total amount of money those 60 students get in a day is $320.\n\nGreat job on solving this problem independently! If you have any more questions or need further explanations, feel free to ask. You did very well by figuring out the solution yourself. Well done!"
+        },
+        {
+            "role": "Student",
+            "content": "Thank you! I'm learning a lot. \ud83d\ude0a  I'll be sure to ask if I need help with anything else."
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! It's great to hear that you're feeling confident and eager to learn more. Don't hesitate to ask if you have any further questions or need additional explanations. You've learned a valuable lesson about how to approach such problems by breaking them down into manageable parts.\n\nKeep up the good work, and enjoy your learning journey! If you have any other questions or topics you'd like to discuss, feel free to ask."
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks again for your help.  \ud83d\ude04"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! I'm always here to help. Feel free to reach out with more questions or if you need further explanations. Have a great day!\n\n\ud83d\ude04"
+        },
+        {
+            "role": "Student",
+            "content": "You too! \ud83d\ude0a"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude0a You too! If you have any more questions, feel free to ask. I'm here for you. \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "I will, thanks! \ud83d\ude04  Have fun helping other students too!"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! I'm glad to help. Other students are always welcome to ask their questions and learn.\n\nHave a great day! If I can assist further, just let me know. \ud83c\udf1f\n\nEnjoy your studies too!"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks! I will \ud83d\ude04  Bye for now! \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! Have a great day ahead. Bye for now! \ud83d\udc4b\ud83d\ude0a\n\nFeel free to reach out if you have more questions in the future. Goodbye! \ud83c\udf1f"
+        },
+        {
+            "role": "Student",
+            "content": "I will, thanks! Bye \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "Goodbye! Take care. \u2600\ufe0f See you soon! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "You too!  \ud83d\ude04"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude04 You too! Have a great day ahead. Talk to you soon! \ud83c\udf1e"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks, you too! \ud83d\ude04\ud83d\udcda"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! \ud83d\udcda Enjoy your studies! See you around."
+        },
+        {
+            "role": "Student",
+            "content": "I will! Bye \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "Goodbye! \ud83d\udc4b Have a great day! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "You too! \ud83d\ude04\u2600\ufe0f"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude04 You too! \u2600\ufe0f Have a great day ahead! See you soon! \ud83c\udf1f"
+        },
+        {
+            "role": "Student",
+            "content": "Bye!\ud83d\udc4b\ud83d\udcda  See you!"
+        },
+        {
+            "role": "Tutor",
+            "content": "Goodbye! \ud83d\udc4b\ud83d\udcda See you soon! \ud83c\udf1f\n\nKeep learning and exploring! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks for the encouragement. \ud83d\ude04\ud83d\udcda\u2728"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! \ud83d\udcda\u2728 Keep up the good work, and have a great day filled with learning adventures!\n\nSee you soon! \ud83d\udc96"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks! I will! \ud83d\ude04\ud83d\udc96\ud83d\udcda See you around! \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! \ud83c\udf89\ud83d\udcda See you around! \ud83d\udc4b\n\nKeep learning and having fun! \ud83d\ude0a\ud83c\udf1f"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks for everything. \ud83d\udc4b\ud83d\ude04  See ya!"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! \ud83d\udc4b\ud83d\ude04 See ya! Have a great one! \ud83d\udd17\ud83d\udcd6"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks, you too! \ud83d\ude04\ud83d\udcda\u2728"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude04 You too! \ud83d\udcda\u2728\n\nHave a wonderful day ahead! \ud83c\udf1e\ud83d\udcd6\n\nSee you soon! \ud83d\udc99\ud83c\udf1f"
+        }
+    ]
+}

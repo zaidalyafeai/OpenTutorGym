@@ -1,0 +1,31 @@
+{
+    "id": "2dbcedb26f1818f9d48b2767cebef9f5ed70b6a65343497d1d01bd722daeacc5",
+    "question": "On a school trip to the seashore, Alan and his friends collected shells. Alan collected four times as many shells as Ben did. Ben got a late start and only collected a third of what Laurie did. If Laurie collected 36 shells how many did Alan collect?",
+    "answer": "48",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many shells did Ben collect? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Ben only collected a third of the number of shells that Laurie collected. Since Laurie collected 36 shells, can you figure out how many shells Ben got?"
+        },
+        {
+            "role": "Student",
+            "content": "So Ben collected 36 / 3 = 12 shells? \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Now that you know Ben collected 12 shells, and Alan collected four times as many shells as Ben did, can you calculate how many shells Alan collected? Remember, if Alan collected four times the number of shells Ben did, it means you need to multiply the number of shells Ben collected by 4."
+        },
+        {
+            "role": "Student",
+            "content": "So, Alan collected 12 * 4 = 48 shells?\n\n\n\nSolution: 48 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! If Alan collected four times as many shells as Ben (who collected 12 shells), then Alan collected \\( 4 \\times 12 = 48 \\) shells. Well done on solving this problem!\n\n<END>"
+        }
+    ]
+}

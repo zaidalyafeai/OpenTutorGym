@@ -1,0 +1,63 @@
+{
+    "id": "439f18eba0b8a8bfedc5dc4e10020ec78bdf3e1020c0462c3fb65f0d8af553f3",
+    "question": "Manny had 3 birthday cookie pies to share with his 24 classmates and his teacher, Mr. Keith.   If each of the cookie pies were cut into 10 slices and Manny, his classmates, and Mr. Keith all had 1 piece, how many slices are left?",
+    "answer": "4",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many total slices are there? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Each cookie pie is cut into 10 slices. Since Manny has 3 cookie pies, can you figure out the total number of slices by multiplying the number of pies by the number of slices per pie?"
+        },
+        {
+            "role": "Student",
+            "content": "Is the total number of slices 30? \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You multiplied the number of pies by the number of slices per pie. So, if each of the 3 cookie pies is cut into 10 slices, how many slices would you have in total? Remember to show your calculation or explain it to see if you got the right answer."
+        },
+        {
+            "role": "Student",
+            "content": "3 x 10 = 30\n\n There are a total of 30 slices. \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job! You correctly calculated that there are 30 slices in total from the 3 cookie pies. Now, remember how many people were eating? Manny plus his 24 classmates and his teacher Mr. Keith all had one slice each. Can you figure out how many slices were eaten by adding these numbers together? That will tell you how many slices are left.\n"
+        },
+        {
+            "role": "Student",
+            "content": "Are there a total of 26 people eating cookie pie?  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's close, but let's think about it again. Manny is one person, his 24 classmates make another group of 24 people, and then Mr. Keith is the teacher too. So if we add Manny (1), his 24 classmates (24), and Mr. Keith (1) together, how many total people are there? Can you calculate this to find out?\n"
+        },
+        {
+            "role": "Student",
+            "content": "1 + 24 + 1 = 26  \n\n There are 26 people eating cookie pie\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! You've correctly identified that there are 26 people in total who ate the cookie slices. Now, if each person had one slice, how many slices were eaten altogether? Can you subtract this number from the total number of slices to find out how many slices are left?\n\nRemember, you have 30 slices and you need to subtract 26 slices that were eaten.\n"
+        },
+        {
+            "role": "Student",
+            "content": "If each of the 26 people ate one slice, then they ate a total of 26 slices.\n\n If we subtract the number of slices eaten (26) from the total number of slices (30), we get 4 slices left over.\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Excellent! You've correctly calculated that if each of the 26 people had one slice, then 26 slices were eaten. To find out how many slices are left, you need to subtract the 26 slices that were eaten from the total of 30 slices.\n\nCan you perform this subtraction and tell me how many slices are left?\nIt looks like a simple calculation\u2014subtracting 26 from 30."
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 4"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You've found that there are 4 slices left after the 26 people ate their portions.\n\nSo, if we start with 30 slices and subtract 26 slices eaten:\n\n\\[ 30 - 26 = 4 \\]\n\nTherefore, there are indeed 4 slices left. Well done on solving this problem!\n\nIf you have any more questions or need further assistance, feel free to ask! <END>"
+        }
+    ]
+}

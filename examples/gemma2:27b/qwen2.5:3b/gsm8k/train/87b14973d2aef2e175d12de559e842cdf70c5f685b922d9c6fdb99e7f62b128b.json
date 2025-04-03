@@ -1,0 +1,55 @@
+{
+    "id": "87b14973d2aef2e175d12de559e842cdf70c5f685b922d9c6fdb99e7f62b128b",
+    "question": "Nancy is filling an aquarium for her fish. She fills it halfway and goes to answer the door. While she's gone, her cat knocks the aquarium over and spills half the water in it. Then Nancy comes back and triples the amount of water in the aquarium. If the aquarium is 4 feet long, 6 feet wide, and 3 feet high, how many cubic feet of water are in the aquarium?",
+    "answer": "54",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "What's the volume of a full aquarium?  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great question! First, let's find out what the total volume of the aquarium is when it's filled completely. Can you remember how to calculate the volume of a rectangular prism like this aquarium? Think about its length, width, and height."
+        },
+        {
+            "role": "Student",
+            "content": "Is the volume found by multiplying length times width times height? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That\u2019s correct! If the aquarium is 4 feet long, 6 feet wide, and 3 feet high, can you calculate the total volume of the aquarium when it's full using that formula? Remember to multiply these three measurements together. Good luck!"
+        },
+        {
+            "role": "Student",
+            "content": "So the volume would be 4 * 6 * 3 = 72 cubic feet. \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Excellent work so far! You've calculated the total volume of the aquarium when it is completely full, which is indeed 72 cubic feet. Now, remember that Nancy fills it halfway initially. How many cubic feet of water would that be? Can you calculate half of the total volume you just found?"
+        },
+        {
+            "role": "Student",
+            "content": "Half of 72 cubic feet is 36 cubic feet.  \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! When Nancy fills the aquarium halfway, there are 36 cubic feet of water in it. Now, while she was away, her cat knocks over the aquarium and spills half of the water inside. How many cubic feet of water would that leave in the aquarium? Can you calculate half of 36 cubic feet?"
+        },
+        {
+            "role": "Student",
+            "content": "Half of 36 cubic feet is 18 cubic feet. \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing great! You've determined that after the cat spills half of the water, there are 18 cubic feet of water left in the aquarium. \n\nThen Nancy comes back and triples the amount of water in the aquarium. Can you figure out how many cubic feet of water would be in the aquarium now? Remember to multiply the remaining water by 3. What do you get?"
+        },
+        {
+            "role": "Student",
+            "content": "18 * 3 = 54 cubic feet.\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Absolutely correct! When Nancy triples the amount of water left in the aquarium, there are indeed 54 cubic feet of water inside.\n\nWell done on solving this problem step by step! The final answer is that there are **54 cubic feet** of water in the aquarium. Congratulations on your understanding and persistence!\n\nIf you have any more questions or need further explanations, feel free to ask. <END>"
+        }
+    ]
+}

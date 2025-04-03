@@ -1,0 +1,39 @@
+{
+    "id": "ed637c5c6caa101a25b8a8738473822bce04aeeecd87147316737312942cb6d8",
+    "question": "Albert is wondering how much pizza he can eat in one day. He buys 2 large pizzas and 2 small pizzas. A large pizza has 16 slices and a small pizza has 8 slices. If he eats it all, how many pieces does he eat that day?",
+    "answer": "48",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many slices are there in total from the large pizzas? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "A large pizza has 16 slices. Since Albert bought 2 large pizzas, can you calculate the total number of slices from the large pizzas now?"
+        },
+        {
+            "role": "Student",
+            "content": "So, 2 large pizzas * 16 slices per pizza = 32 slices.  \n\nHow many slices are there in total from the small pizzas?"
+        },
+        {
+            "role": "Tutor",
+            "content": "A small pizza has 8 slices. Since Albert bought 2 small pizzas, can you calculate the total number of slices from the small pizzas now?"
+        },
+        {
+            "role": "Student",
+            "content": "2 small pizzas * 8 slices per pizza = 16 slices.\n\nHow do I find the total number of slices Albert eats?"
+        },
+        {
+            "role": "Tutor",
+            "content": "You have found that there are 32 slices from the large pizzas and 16 slices from the small pizzas. To find out how many slices Albert eats in total, you need to add these two numbers together. Can you calculate the total now?"
+        },
+        {
+            "role": "Student",
+            "content": "32 + 16 = 48\n\nSolution: 48"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! You have added 32 and 16 together to get a total of 48 slices.\n\nAlbert eats 48 pieces of pizza that day. Well done!\n\n<END>"
+        }
+    ]
+}

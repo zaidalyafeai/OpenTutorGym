@@ -1,0 +1,63 @@
+{
+    "id": "5224a8fce747b72ed4aa6f4a91032b8a0eb2cc8eacc635ce61921c666d22c868",
+    "question": "James creates a media empire.  He creates a movie for $2000.  Each DVD cost $6 to make.  He sells it for 2.5 times that much.  He sells 500 movies a day for 5 days a week.  How much profit does he make in 20 weeks?",
+    "answer": "448000",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How much does James sell each DVD for? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "To find out how much James sells each DVD for, you need to multiply the cost of making each DVD by 2.5. Can you calculate that amount using $6 as the cost per DVD?"
+        },
+        {
+            "role": "Student",
+            "content": "Is it $15?  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, if each DVD costs $6 to make and he sells it for 2.5 times that much, then each DVD is sold for $15. Is there any other information you can use with this price to find out the profit James makes in 20 weeks?"
+        },
+        {
+            "role": "Student",
+            "content": "He sells 500 movies a day for 5 days a week.  How much does he make per week?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You know he sells 500 movies each day at $15 each and this continues for 5 days a week. To find out how much he makes in one week, you need to multiply the number of movies sold each day by the price per DVD and then by the number of days he sells DVDs in a week. Can you calculate that?"
+        },
+        {
+            "role": "Student",
+            "content": "Is it $37,500? \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, if James sells 500 movies at $15 each for 5 days a week, you can find out his weekly earnings by calculating \\(500 \\times 15 \\times 5\\). Can you do that calculation to confirm your answer is correct?"
+        },
+        {
+            "role": "Student",
+            "content": "You are right! I calculated it correctly.\n\nNow, what else do we need to figure out how much profit he makes in 20 weeks?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job so far! To find out the profit James makes in 20 weeks, you need to multiply his weekly earnings by the number of weeks. Since you already know his weekly earnings, all you need to do now is calculate \\( \\text{weekly earnings} \\times 20 \\). Can you do that calculation?"
+        },
+        {
+            "role": "Student",
+            "content": "Is it $750,000 ?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, if James makes $37,500 per week and he operates his media empire for 20 weeks, then multiplying these two numbers (\\(37,500 \\times 20\\)) will give you the total profit. Can you confirm this calculation to find out the exact amount of profit in dollars?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 750000"
+        },
+        {
+            "role": "Tutor",
+            "content": "You calculated correctly that James makes $750,000 in profit over 20 weeks. Well done!\n\n<END>"
+        }
+    ]
+}

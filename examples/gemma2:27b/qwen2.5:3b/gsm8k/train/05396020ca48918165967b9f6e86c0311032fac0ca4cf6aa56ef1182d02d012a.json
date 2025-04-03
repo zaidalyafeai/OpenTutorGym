@@ -1,0 +1,47 @@
+{
+    "id": "05396020ca48918165967b9f6e86c0311032fac0ca4cf6aa56ef1182d02d012a",
+    "question": "Julie is reading a 120-page book. Yesterday, she was able to read 12 pages and today, she read twice as many pages as yesterday. If she wants to read half of the remaining pages tomorrow, how many pages should she read?",
+    "answer": "42",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many pages did Julie read today? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Today, Julie read twice as many pages as she did yesterday. Since she read 12 pages yesterday, can you figure out how many pages she read today based on that information?"
+        },
+        {
+            "role": "Student",
+            "content": "Did Julie read 24 pages today?  \n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's right! You've calculated correctly that Julie read 24 pages today because it was twice the number of pages she read yesterday. Now, let's find out how many pages are left to be read after these days. Can you figure out the total number of pages left by adding the pages read yesterday and today?"
+        },
+        {
+            "role": "Student",
+            "content": "Julie has read a total of 36 pages (12+24).  \n\nDoes that mean there are 84 pages left to read? (120 - 36) \n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done great so far! Now, if we subtract the 36 pages Julie has already read from the total of 120 pages in the book, how many pages are left for her to read? Can you calculate that number?"
+        },
+        {
+            "role": "Student",
+            "content": "There are 84 pages left to read. (120 - 36)  \n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Julie has 84 pages left to read. Now, she wants to read half of the remaining pages tomorrow. How many pages should she aim to read tomorrow? Can you figure that out by dividing the number of pages left by 2?"
+        },
+        {
+            "role": "Student",
+            "content": "Julie should read 42 pages tomorrow. (84 / 2)\n\nSolution: 42"
+        },
+        {
+            "role": "Tutor",
+            "content": "You've done it! Julie should indeed read 42 pages tomorrow to meet her goal. That's half of the remaining 84 pages.\n\nGreat job, you figured this out all by yourself!\n\n<END>"
+        }
+    ]
+}

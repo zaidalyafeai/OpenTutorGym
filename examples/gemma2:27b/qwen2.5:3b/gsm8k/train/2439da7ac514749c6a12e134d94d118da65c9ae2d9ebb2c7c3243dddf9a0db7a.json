@@ -1,0 +1,39 @@
+{
+    "id": "2439da7ac514749c6a12e134d94d118da65c9ae2d9ebb2c7c3243dddf9a0db7a",
+    "question": "Nancy, the librarian, is shelving books from the cart. She shelved 12 history books, 8 romance books, and 4 poetry books from the top section of the cart. Half the books on the bottom section of the cart were mystery books, which she quickly put back into place. Then, she shelved the remaining books from the bottom of the cart, including 5 Western novels and 6 biographies. How many books did she have on the book cart when she started?",
+    "answer": "46",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many books did Nancy shelve from the top section of the cart? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You correctly identified that Nancy shelved 12 history books, 8 romance books, and 4 poetry books from the top section of the cart. Can you figure out how many mystery books she put back on the bottom section after seeing half of them? Remember to keep track of all the books she shelved."
+        },
+        {
+            "role": "Student",
+            "content": "I know Nancy shelved 24 books (12 + 8 + 4) from the top section.  \n\nIf half the books on the bottom were mysteries, how many mystery books did she put back?\n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Great job figuring out that Nancy shelved a total of 24 books from the top section of the cart. If half the books on the bottom section were mystery books and she shelved 5 Western novels and 6 biographies from the bottom, how many mystery books did she put back? Think about what number you need to find when half of it is equal to the total mystery books she shelved.\n  \nRemember, the total number of all these books will give us the answer."
+        },
+        {
+            "role": "Student",
+            "content": "If Nancy shelved 5 Western novels and 6 biographies from the bottom section, that's a total of 11 books (5 + 6).\n\nSince these 11 books represent half of the books on the bottom section, there must have been 22 books (11 x 2) on the bottom section in total. \n\nThat means she put back 11 mystery books.  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're doing great! You correctly identified that the 5 Western novels and 6 biographies from the bottom section make up half of the books there, meaning there were 22 books on the bottom section in total. Since these represent half of the books, you've figured out that Nancy put back 11 mystery books.\n\nNow, let's add it all together:\n\n- Top section: 24 books (history, romance, and poetry)\n- Bottom section: 22 books (mystery + Western novels + biographies)\n\nWhat is the total number of books on the book cart when she started? Can you find this by adding the numbers together?\n  \nSolution: <solution>  \n(Nancy put back 11 mystery books from the bottom, and we know 5 were Western novels and 6 were biographies. So far, that\u2019s a total of 24 + 11 = 35 books.)\nSolution: 35\n\nYou've figured out that when she started, Nancy had 35 books on her book cart. Is this the correct number?"
+        },
+        {
+            "role": "Student",
+            "content": "Solution: 35 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Solution: <solution> 35  \nYou have correctly calculated that Nancy had a total of 35 books on her book cart when she started. This includes all the books from both sections. \n\nWell done! You've solved this problem very well. If you have any more questions or need further assistance, feel free to ask.\n\n<END>"
+        }
+    ]
+}

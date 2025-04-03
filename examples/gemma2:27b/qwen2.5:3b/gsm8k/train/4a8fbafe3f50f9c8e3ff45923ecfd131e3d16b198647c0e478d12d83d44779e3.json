@@ -1,0 +1,167 @@
+{
+    "id": "4a8fbafe3f50f9c8e3ff45923ecfd131e3d16b198647c0e478d12d83d44779e3",
+    "question": "Brandon sold 86 geckos last year. He sold twice that many the year before. How many geckos has Brandon sold in the last two years?",
+    "answer": "258",
+    "conversation": [
+        {
+            "role": "Student",
+            "content": "How many geckos did Brandon sell the year before last year? \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "If Brandon sold 86 geckos last year and he sold twice as many the year before, how much did he sell the year before last year? Calculate that number."
+        },
+        {
+            "role": "Student",
+            "content": "So if he sold 86 last year and twice that the year before,  did he sell 86 * 2 = 172 geckos the year before last year? \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's correct! Now, to find out how many geckos Brandon has sold in the last two years, you need to add the number of geckos sold last year and the number sold the year before. Can you calculate that total?"
+        },
+        {
+            "role": "Student",
+            "content": "So to find the total, I would add 86 + 172 = 258 geckos?\n\n\nSolution: 258 \n"
+        },
+        {
+            "role": "Tutor",
+            "content": "Yes, you've done it correctly! Brandon has sold a total of 258 geckos in the last two years. \n\nGreat job solving this problem on your own!\n\nEND\n"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks for helping me! I'm getting better at math!"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're very welcome! It's great to hear that you're finding ways to improve and enjoy learning more about numbers and problems like these. Keep up the good work, and don't hesitate to ask if you have more questions or need further practice!"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Math can be tricky sometimes, but it's fun when I figure things out. \ud83d\ude0a  See you next time! \n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "That's wonderful to hear! It's always exciting when math problems start to make sense as you solve them. Don't hesitate to ask if you have more questions or need help with something else. See you next time! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "Bye for now! \ud83d\udc4b \n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b Bye for now! Have a great day! \ud83d\ude04"
+        },
+        {
+            "role": "Student",
+            "content": "You too! \ud83d\ude01"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude0a You too! Take care!"
+        },
+        {
+            "role": "Student",
+            "content": "I will!  See you later! \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b See you later! Stay curious and keep practicing! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks for the encouragement! \ud83d\ude04\ud83d\udcda\u270f\ufe0f"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! Keep up the good work. If you have any more questions or need help, be sure to ask. Have a great day! \ud83d\ude04\ud83d\udcd6\ud83d\udcdd"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks again! \ud83d\ude0a  Have a wonderful day too! \ud83d\udc4b\u2600\ufe0f  \n\n\n\n"
+        },
+        {
+            "role": "Tutor",
+            "content": "You're welcome! Have a wonderful day too! See you soon! \ud83d\ude0a\ud83c\udf1e\ud83d\udc4b"
+        },
+        {
+            "role": "Student",
+            "content": "See ya! \ud83d\udc4b\ud83d\ude04\ud83d\udcda"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b\ud83d\ude04\ud83d\udcda You too! See you later! \ud83c\udf05"
+        },
+        {
+            "role": "Student",
+            "content": "Bye! \ud83d\ude04  "
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b\ud83d\ude04 Bye for now! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "Bye bye! \ud83d\ude0a"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b\ud83d\ude0a Bye bye! Have a great day! \ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "You too! \ud83d\udc4b\ud83d\ude04\u2600\ufe0f\ud83d\udcda"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b\ud83d\ude04\u2600\ufe0f\ud83d\udcda You too! \ud83d\ude0a Have a great day ahead! \ud83c\udf05\u2728"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks, I will!  See you around! \ud83d\ude04"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude04 See you around! Have a great one! \ud83d\udd70\ufe0f\ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "You too! \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b You too! Have a wonderful day ahead! \ud83c\udf1e\ud83d\ude0a"
+        },
+        {
+            "role": "Student",
+            "content": "I will! Thanks! \ud83d\ude04\ud83d\udcda"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude04\ud83d\udcda You're welcome! Have a great day filled with learning and fun! \ud83c\udf1e\ud83d\udcd6"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks! I'll try my best! \ud83d\ude0a\ud83d\udc4b  See you later!"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude0a\ud83d\udc4b You're welcome! Try your best, and see you later for more learning adventures! \ud83d\ude80\u2728"
+        },
+        {
+            "role": "Student",
+            "content": "Will do! \ud83d\ude80\ud83d\udcda\ud83d\ude04 See ya! \ud83d\udc4b"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\ude80\ud83d\udcda\ud83d\ude04 See ya! \ud83d\udc4b You'll have a great one! \ud83d\ude0a Have a fantastic day ahead! \ud83c\udf1e\ud83c\udf1f"
+        },
+        {
+            "role": "Student",
+            "content": "Thanks! I will!  \ud83d\udc4b \ud83d\ude04\u2600\ufe0f"
+        },
+        {
+            "role": "Tutor",
+            "content": "\ud83d\udc4b \ud83d\ude04\u2600\ufe0f You're welcome! Have an amazing day filled with sunshine and learning! \ud83c\udf1e\ud83d\udcda\ud83d\ude04\u2728"
+        }
+    ]
+}
