@@ -2,7 +2,7 @@ import argparse
 from run_model_predictions import run_model_predictions
 from datasets import load_from_disk
 from dotenv import load_dotenv
-from predict import LLMPredictor
+from predict import LLMPredictor, LLMJudge
 import asyncio
 import os
 import json
@@ -20,7 +20,7 @@ load_dotenv()
 
 def load_tutor_examples(dataset, fewshot_size):
     examples = []
-    path = f"examples/{args.tutor_model}/{args.student_model}/{dataset}/train"
+    path = f"../examples/gemma2:27b/qwen2.5:3b/{dataset}/train"
     for file in os.listdir(path):
         with open(f"{path}/{file}", "r") as f:
             examples.append(json.load(f))
@@ -145,6 +145,7 @@ if __name__ == "__main__":
     args.system_prompt = ""
     args.examples = []
     fewshot_size = int(args.mode.split(":")[1])
+    args.judge = LLMJudge(model = args.judge_model)
     if fewshot_size > 0:
         if "fewshot" in args.mode:
             args.examples = load_examples(args.dataset, fewshot_size)

@@ -40,7 +40,6 @@ def format_model_response(response):
 
 
 async def attempt_question(example):
-    judge = LLMJudge()
     system_prompt, prompt = format_message(example)
     question = example["question"]
     answer = example["answer"]
@@ -56,7 +55,7 @@ async def attempt_question(example):
             response=model_response,
         )
         prompt = JUDGE_PROMPT.format(question=question, correct_answer=correct_answer, response=model_response)
-        response = await judge.get_response(prompt)
+        response = await args.judge.get_response(prompt)
         return {
             "id": question_id,
             "contexts": contexts,

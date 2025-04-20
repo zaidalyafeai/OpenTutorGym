@@ -46,7 +46,7 @@ class LLMJudge:
     def __init__(self, model: str = "openai/gpt-4o-mini"):
         self.model = model
 
-    async def get_response(self, prompt: str) -> str:
+    async def get_response_router(self, prompt: str) -> str:
         
         client = OpenAI(api_key=os.environ.get("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
         response = client.beta.chat.completions.parse(
@@ -55,14 +55,28 @@ class LLMJudge:
             response_format=ExtractedAnswer,
         )
         return response.choices[0].message.parsed
-        
+    
+    async def get_response_vllm(self, prompt: str) -> str:
+        client = OpenAI(api_key="EMPTY", base_url="http://localhost:8080/v1")
+        response = client.beta.chat.completions.parse(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            response_format=ExtractedAnswer,
+        )
+        return response.choices[0].message.parsed
+    
+    async def get_response(self, prompt: str) -> str:
+        if "Qwen" in self.model:
+            return await self.get_response_vllm(prompt)
+        else:
+            return await self.get_response_router(prompt)
 class LLMPredictor:
     """Class to handle LLM conversations and predictions"""
     
     # Model type constants
     GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
     DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
-    GEMINI_LLMS = ["google/gemini-flash-1.5", "google/gemini-2.0-pro-exp-02-05:free"]
+    GEMINI_LLMS = ["google/gemini-flash-1.5", "deepseek/deepseek-v3-base:free", "google/gemini-2.5-pro-exp-03-25:free"]
     VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
     API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS
     
@@ -105,6 +119,7 @@ class LLMPredictor:
             return response.choices[0].message.content, contexts
         except Exception as e:
             print(f"Error during API call: {str(e)}")
+            print(response)
             # raise  # Re-raise the exception after logging
          
 
@@ -144,19 +159,19 @@ class LLMPredictor:
             {"role": "system", "content": tutor_system},
             {"role": "assistant", "content": question},
         ]
-        
-        conversation = []
+        conversation = [{"role": "assistant", "content": question}]
+        if log:
+            print("")
         for _ in range(max_turns):
             response, _ = await self.get_llm_response(self.student_model, student_messages, port = "8000")
-            if log:
-                print("Student: ", response.strip())
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
-            response, _ = await self.get_llm_response(self.tutor_model, tutor_messages, port = "8080")
             if log:
-                print("Tutor: ", response.strip())
+                print("Tutor: ", conversation[-2]["content"])
+                print("Student: ", conversation[-1]["content"])
+            response, _ = await self.get_llm_response(self.tutor_model, tutor_messages, port = "8080")
             conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
