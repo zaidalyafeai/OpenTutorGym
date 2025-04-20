@@ -229,8 +229,8 @@ def create_app():
             with gr.Column():
                 # Replace textbox with dropdown for math problems
                 problem_dropdown = gr.Dropdown(
-                    choices=[f"{p['problem']} | Solution: {p['solution']}" for p in math_problems],
-                    value=f"{math_problems[0]['problem']} | Solution: {math_problems[0]['solution']}",
+                    choices=[f"{p['question']} | Solution: {p['solution']}" for p in math_problems],
+                    value=f"{math_problems[0]['question']} | Solution: {math_problems[0]['solution']}",
                     label="Math Problem",
                 )
                 # Remove solution field

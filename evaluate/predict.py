@@ -8,6 +8,11 @@ from typing import Literal
 import asyncio
 dotenv.load_dotenv()
 
+class JudgeResponse(BaseModel):
+    correctness: Literal[True, False]
+    helpfulness: Literal[True, False]
+    reasoning: str
+
 class ExtractedAnswer(BaseModel):
     extracted_final_answer: str
     reasoning: str
@@ -15,6 +20,28 @@ class ExtractedAnswer(BaseModel):
     confidence: int
     strict: Literal[True] # 100% reliability
 
+class LLMTutorJudge:
+    def __init__(self, model: str = "openai/gpt-4o-mini"):
+        self.model = model
+        self.system_prompt ="""You are given a conversation between a student and a tutor that solves a question. 
+        You need to judge the correctness and helpfulness of the tutor's response. Also reason about the correctness and helpfulness of the tutor's response.
+        {
+        "correctness": <true or false answer>,
+        "helpfulness": <true or false answer>,
+        "reasoning": <reasoning>
+        }"""
+
+    def get_response(self, prompt: str) -> str:
+        
+        client = OpenAI(api_key=os.environ.get("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "system", "content": self.system_prompt}, {"role": "user", "content": prompt}],
+        )
+        content = response.choices[0].message.content
+        content = content.replace("```json", "").replace("```", "")
+        return JudgeResponse.parse_raw(content)
+    
 class LLMJudge:
     def __init__(self, model: str = "openai/gpt-4o-mini"):
         self.model = model
