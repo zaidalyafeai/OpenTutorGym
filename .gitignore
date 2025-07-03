@@ -9,3 +9,4 @@ evaluate/results*
 evaluate/data/*
 evaluate/examples/*
 dcgm/
+.cache/
