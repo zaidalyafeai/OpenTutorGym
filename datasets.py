@@ -40,7 +40,7 @@ class Conversation:
         out += f"--------------------------------\n"
         return out
 
-class Dataset:
+class DialougeDataset:
     def __init__(self, conversations = [], subset = 'train'):
         self.subset = subset
         self.conversations = conversations
@@ -51,7 +51,7 @@ class Dataset:
     def __getitem__(self, idx):
         return self.conversations[idx]
 
-class StepVerify(Dataset):
+class StepVerify(DialougeDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/eth-lre/verify-then-generate/refs/heads/main/dataset/dataset.json'
@@ -64,7 +64,7 @@ class StepVerify(Dataset):
             dialouge.append({"role": "student" , "content": item['student_correct_response']})
             self.conversations.append(Conversation(problem = Problem(text = item['problem']), solution = item['reference_solution'], topic = item['topic'], dialouge = dialouge))
 
-class MathDial(Dataset):
+class MathDial(DialougeDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         """
@@ -98,7 +98,7 @@ class MathDial(Dataset):
             dialouge.append({"role": "student" , "content": item['student_incorrect_solution']})
             self.conversations.append(Conversation(problem = Problem(text = item['question']), solution = item['ground_truth'], topic = item['student_profile'], dialouge = dialouge))
 
-class Bridge(Dataset):
+class Bridge(DialougeDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         if self.subset == 'train':
@@ -120,7 +120,7 @@ class Bridge(Dataset):
                     dialouge.append({"role": turn['user'], "content": turn['text']})
             self.conversations.append(Conversation(topic = item['lesson_topic'], dialouge = dialouge))
 
-class Cima(Dataset):
+class Cima(DialougeDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = "https://raw.githubusercontent.com/kstats/CIMA/refs/heads/master/dataset.json"
@@ -151,7 +151,7 @@ class Cima(Dataset):
             topic = img_name.split('.')[0]
             self.conversations.append(Conversation(problem = Problem(img = img_path), dialouge = dialouge, topic = topic))
 
-class CoMTA(Dataset):
+class CoMTA(DialougeDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Khan/tutoring-accuracy-dataset/refs/heads/main/CoMTA_dataset.json'
@@ -185,17 +185,22 @@ def load_dataset(dataset_name):
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
+print('Stepwise Verify')
 dataset = load_dataset('stepwise_verify')
 print(dataset.conversations[0])
 
+print('MathDial')
 dataset = load_dataset('mathdial')
 print(dataset.conversations[0])
 
+print('Bridge')
 dataset = load_dataset('bridge')
 print(dataset.conversations[0])
 
+print('Cima')
 dataset = load_dataset('cima')
 print(dataset.conversations[0])
 
+print('CoMTA')
 dataset = load_dataset('comta')
 print(dataset.conversations[0])
