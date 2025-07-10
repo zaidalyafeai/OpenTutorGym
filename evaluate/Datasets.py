@@ -3,7 +3,8 @@ import requests
 from PIL import Image
 import zipfile
 import os
-
+import hashlib
+import datasets
 class Problem:
     def __init__(self, text = '', img = None):
         self.text = text
@@ -40,6 +41,34 @@ class Conversation:
         out += f"--------------------------------\n"
         return out
 
+def hash_question(question: str) -> str:
+    return hashlib.sha256(question.encode()).hexdigest()
+
+def load_dataset(dataset_name: str):
+    if dataset_name == "gsm8k":
+        return GSM8K()
+    else:
+        raise ValueError(f"Dataset {dataset_name} not found")
+
+class Dataset:
+    def __init__(self, dataset_name: str):
+        self.dataset_name = dataset_name
+
+class GSM8K(Dataset):
+    def __init__(self):
+        self.dataset_name = "gsm8k"
+        self.split = "test"
+        self.subset = "main"
+        self.hf_name = "openai/gsm8k"
+        self.dataset = datasets.load_dataset(self.hf_name, self.subset, streaming = True)[self.split]
+
+    
+    def process_dataset(self):
+        self.dataset = self.dataset.map(lambda x: {"question": x['question'], "answer": x['answer'].split("####")[1].strip()})
+        self.dataset = self.dataset.map(lambda x: {"id": hash_question(x["question"])})
+        return self.dataset
+    
+    
 class DialougeDataset:
     def __init__(self, conversations = [], subset = 'train'):
         self.subset = subset
@@ -185,22 +214,22 @@ def load_dataset(dataset_name):
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
-print('Stepwise Verify')
-dataset = load_dataset('stepwise_verify')
-print(dataset.conversations[0])
+# print('Stepwise Verify')
+# dataset = load_dataset('stepwise_verify')
+# print(dataset.conversations[0])
 
-print('MathDial')
-dataset = load_dataset('mathdial')
-print(dataset.conversations[0])
+# print('MathDial')
+# dataset = load_dataset('mathdial')
+# print(dataset.conversations[0])
 
-print('Bridge')
-dataset = load_dataset('bridge')
-print(dataset.conversations[0])
+# print('Bridge')
+# dataset = load_dataset('bridge')
+# print(dataset.conversations[0])
 
-print('Cima')
-dataset = load_dataset('cima')
-print(dataset.conversations[0])
+# print('Cima')
+# dataset = load_dataset('cima')
+# print(dataset.conversations[0])
 
-print('CoMTA')
-dataset = load_dataset('comta')
-print(dataset.conversations[0])
+# print('CoMTA')
+# dataset = load_dataset('comta')
+# print(dataset.conversations[0])

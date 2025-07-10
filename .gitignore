@@ -10,3 +10,6 @@ evaluate/data/*
 evaluate/examples/*
 dcgm/
 .cache/
+
+unsloth_compiled_cache/
+examples/

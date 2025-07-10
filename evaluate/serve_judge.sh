@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen2.5-7B-Instruct --dtype=half --port 8080

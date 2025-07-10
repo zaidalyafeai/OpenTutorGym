@@ -1,9 +1,10 @@
-from datasets import load_from_disk
 import json
 from tqdm import tqdm
 from predict import LLMPredictor
 import os
 import asyncio
+from Datasets import GSM8K
+
 async def process_dataset(
         dataset_name: str,
         split: str,
@@ -14,15 +15,15 @@ async def process_dataset(
     ):
         """Process a dataset and save the conversations"""
         # Load dataset
-        dataset = load_from_disk(f"data/{dataset_name}.parquet")[split]
-        dataset = dataset.select(range(max_dataset_size))
+        dataset = GSM8K()
+        dataset = dataset.process_dataset()
 
         # Create hash for results directory
-        results_path = f"examples/{predictor.student_model}/{predictor.tutor_model}/{dataset_name}/{split}"
+        results_path = f"examples/output"
         os.makedirs(results_path, exist_ok=True)
         config = {
-                "student_model": predictor.student_model,
-                "tutor_model": predictor.tutor_model,
+                "student_model": predictor.student_model.model_name,
+                "tutor_model": predictor.tutor_model.model_name,
                 "language": language,
                 "student_level": student_level,
             }
@@ -55,8 +56,8 @@ async def process_dataset(
                 json.dump(results, f, indent=4)
 
 async def main():
-    student_model = "Qwen/Qwen2.5-7B-Instruct"
-    tutor_model = "google/gemini-flash-1.5"
+    student_model = "unsloth/Qwen3-4B"
+    tutor_model = "unsloth/Qwen3-4B"
     predictor = LLMPredictor(mode="tutor", student_model=student_model, tutor_model=tutor_model)
 
     await process_dataset(

@@ -1,9 +1,10 @@
-TUTOR_MODEL="Qwen/Qwen2.5-7B-Instruct"
-STUDENT_MODEL="Qwen/Qwen2.5-3B-Instruct"
+TUTOR_MODEL="google/gemini-flash-1.5"
+STUDENT_MODEL="Qwen/Qwen2.5-7B-Instruct"
 # STUDENT_MODEL="gemma3:12b"
-JUDGE_MODEL="deepseek/deepseek-chat-v3-0324:free"
+JUDGE_MODEL="google/gemini-flash-1.5"
+# JUDGE_MODEL="Qwen/Qwen2.5-7B-Instruct"
 DATASET="gsm8k"
-MODE="tutor:3"
+MODE="tutor:0"
 MAX_COMPLETION_TOKENS=8192
 NUM_WORKERS=64
 MAX_DATASET_SIZE=128
@@ -15,4 +16,6 @@ python main.py --dataset ${DATASET} --student_model ${STUDENT_MODEL} --tutor_mod
       --max_dataset_size ${MAX_DATASET_SIZE} \
       --directory ${DIRECTORY} \
       --mode ${MODE} \
+      --use_judge \
+      --judge_model ${JUDGE_MODEL} \
       --overwrite
