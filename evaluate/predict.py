@@ -5,9 +5,17 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from typing import Literal
-import asyncio
 from unsloth import FastLanguageModel, FastModel
+from trl import SFTTrainer, SFTConfig
+from datasets import Dataset
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import multiprocessing
+import os
+_original_cpu_count = multiprocessing.cpu_count
+multiprocessing.cpu_count = lambda: 1
 
+if hasattr(os, 'cpu_count'):
+    os.cpu_count = lambda: 4
 dotenv.load_dotenv()
 
 class JudgeResponse(BaseModel):
@@ -28,7 +36,7 @@ DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
 GEMINI_LLMS = ["google/gemini-flash-1.5", "deepseek/deepseek-v3-base:free", "google/gemini-2.5-pro-exp-03-25:free"]
 VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
 API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS
-UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B"]
+UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B", "unsloth/Qwen3-30B-A3B-GGUF", "unsloth/Qwen3-14B"]
 
 class LLMTutorJudge:
     def __init__(self, model: str = "openai/gpt-4o-mini"):
@@ -56,7 +64,7 @@ class LLMJudge:
     def __init__(self, model: str = "openai/gpt-4o-mini"):
         self.model = model
 
-    async def get_response_router(self, prompt: str) -> str:
+    def get_response_router(self, prompt: str) -> str:
         
         client = OpenAI(api_key=os.environ.get("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
         response = client.beta.chat.completions.parse(
@@ -66,7 +74,7 @@ class LLMJudge:
         )
         return response.choices[0].message.parsed
     
-    async def get_response_vllm(self, prompt: str) -> str:
+    def get_response_vllm(self, prompt: str) -> str:
         client = OpenAI(api_key="EMPTY", base_url="http://localhost:8080/v1")
         response = client.beta.chat.completions.parse(
             model=self.model,
@@ -75,11 +83,11 @@ class LLMJudge:
         )
         return response.choices[0].message.parsed
     
-    async def get_response(self, prompt: str) -> str:
+    def get_response(self, prompt: str) -> str:
         if "Qwen" in self.model:
-            return await self.get_response_vllm(prompt)
+            return self.get_response_vllm(prompt)
         else:
-            return await self.get_response_router(prompt)
+            return self.get_response_router(prompt)
 
 def get_ollama_models(self):
         """Return available models from Ollama and API providers"""
@@ -109,15 +117,18 @@ def get_ollama_models(self):
 class UnslothLLM:
     def __init__(self, model_name: str = "unsloth/gemma-3-4B-it"):
         self.model_name = model_name
-        self.model, self.tokenizer = FastModel.from_pretrained(
+        print('loading check point for ', self.model_name)
+        self.model, _ = FastModel.from_pretrained(
             model_name = self.model_name,
             max_seq_length = 2048, # Choose any for long context!
             load_in_4bit = True,  # 4 bit quantization to reduce memory
             load_in_8bit = False, # [NEW!] A bit more accurate, uses 2x memory
             full_finetuning = False, # [NEW!] We have full finetuning now!
         )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        print('check point loaded')
 
-    async def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
+    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
         text = self.tokenizer.apply_chat_template(
             contexts,
             tokenize=False,
@@ -144,6 +155,50 @@ class UnslothLLM:
         content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
         return content
     
+    def fine_tune(self, dataset: List[Dict[str, Any]]):
+        conversations = dataset.get_dialouge()
+        conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
+        conversations = Dataset.from_list(conversations)
+        print(conversations)
+        model = FastLanguageModel.get_peft_model(
+            self.model,
+            r = 32,           # Choose any number > 0! Suggested 8, 16, 32, 64, 128
+            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+                            "gate_proj", "up_proj", "down_proj",],
+            lora_alpha = 32,  # Best to choose alpha = rank or rank*2
+            lora_dropout = 0, # Supports any, but = 0 is optimized
+            bias = "none",    # Supports any, but = "none" is optimized
+            # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
+            use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
+            random_state = 3407,
+            use_rslora = False,   # We support rank stabilized LoRA
+            loftq_config = None,  # And LoftQ
+        )
+
+        trainer = SFTTrainer(
+            model = model,
+            tokenizer = self.tokenizer,
+            train_dataset = conversations,
+            eval_dataset = None, # Can set up evaluation!
+            args = SFTConfig(
+                dataset_text_field = "text",
+                per_device_train_batch_size = 2,
+                gradient_accumulation_steps = 4, # Use GA to mimic batch size!
+                warmup_steps = 5,
+                num_train_epochs = 1, # Set this for 1 full training run.
+                learning_rate = 2e-4, # Reduce to 2e-5 for long training runs
+                logging_steps = 1,
+                optim = "adamw_8bit",
+                weight_decay = 0.01,
+                lr_scheduler_type = "linear",
+                seed = 3407,
+                report_to = "none", # Use this for WandB etc
+            ),
+        )
+        trainer_stats = trainer.train()
+        return trainer_stats
+
+    
 
 class APILLM:
 
@@ -151,7 +206,7 @@ class APILLM:
         self.model = model
         self.port = port
 
-    async def get_llm_response(self, str, contexts: List[Dict[str, Any]]) -> str:
+    def get_llm_response(self, str, contexts: List[Dict[str, Any]]) -> str:
         """Get response from LLM based on model type"""
         api_key = ""
         api_base = ""
@@ -174,35 +229,28 @@ class APILLM:
         # print(f"Using model: {model}")
         # print(f"Request contexts: {contexts}")
         try:
-            response = await asyncio.to_thread(
-                client.chat.completions.create, 
+            response = client.chat.completions.create(
                 model=self.model, 
                 messages=contexts
             )
+            
             # print(f"API Response: {response}")
             return response.choices[0].message.content
         except Exception as e:
             print(f"Error during API call: {str(e)}")
             print(response)
             # raise  # Re-raise the exception after logging
-         
-class LLMPredictor:
+
+
+class LLMGenerator:
     """Class to handle LLM conversations and predictions"""
     
-    def __init__(self, mode: str = "standard", student_model: str = "gemma2:27b", tutor_model: str = "gemma2:27b"):
-        self.mode = mode
-        
-        if student_model in UNSLOTH_LLMS:
-            self.student_model = UnslothLLM(student_model)
-            self.tutor_model = UnslothLLM(tutor_model)
-        elif student_model in API_LLMS:
-            self.student_model = APILLM(student_model, port = "8000")
-            self.tutor_model = APILLM(tutor_model, port = "8001")
-        else:
-            raise ValueError(f"Invalid model: {student_model} or {tutor_model}")
-        
+    def __init__(self, student_model, tutor_model):
+        self.mode = 'tutor'
+        self.student_model = student_model
+        self.tutor_model = tutor_model
 
-    async def predict_conversation(
+    def predict_conversation(
         self,
         question: str,
         language: str = "English",
@@ -242,7 +290,7 @@ class LLMPredictor:
         if log:
             print("")
         for _ in range(max_turns):
-            response = await self.student_model.get_llm_response(student_messages)
+            response = self.student_model.get_llm_response(student_messages)
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
@@ -250,7 +298,7 @@ class LLMPredictor:
             if log:
                 print("Tutor: ", conversation[-2]["content"])
                 print("Student: ", conversation[-1]["content"])
-            response = await self.tutor_model.get_llm_response(tutor_messages)
+            response = self.tutor_model.get_llm_response(tutor_messages)
             conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
@@ -261,7 +309,7 @@ class LLMPredictor:
         return conversation[-2]["content"], conversation
 
         
-    async def predict_standard(self, examples: List[Dict[str, Any]], question: str = None):
+    def predict_standard(self, examples: List[Dict[str, Any]], question: str = None):
         """Make a few-shot prediction based on examples"""
 
         system_prompt = """You are given a question. you need to answer the question step by step. Provide the answer in the following format:
@@ -278,7 +326,7 @@ class LLMPredictor:
             contexts.append({"role": "assistant", "content": "Solution: " + example["answer"]})
         
         contexts.append({"role": "user", "content": f"Question: {question}"})
-        return await self.get_llm_response(self.student_model, contexts)
+        return self.get_llm_response(self.student_model, contexts)
     
     def process_conversation_examples(self, examples: List[Dict[str, Any]]):
         prompt = """You are a student. You are given a conversation between a student and a tutor that solves a question. 
@@ -297,18 +345,18 @@ class LLMPredictor:
             conversations.append({"role": "assistant", "content": "Solution: " + example["answer"]})
         return conversations
     
-    async def predict_conversation_examples(self, examples: List[Dict[str, Any]], question: str = None):
+    def predict_conversation_examples(self, examples: List[Dict[str, Any]], question: str = None):
         contexts= self.process_conversation_examples(examples)
         contexts.append({"role": "user", "content": "Question: " + question})
-        return await self.get_llm_response(self.student_model, contexts)
+        return self.get_llm_response(self.student_model, contexts)
     
-    async def predict(self, examples: List[Dict[str, Any]], question: str = None, answer: str = None):
+    def predict(self, examples: List[Dict[str, Any]], question: str = None, answer: str = None):
         if "tutor" in self.mode:
             if len(examples) > 0:
-                return await self.predict_conversation_examples(examples, question)
+                return self.predict_conversation_examples(examples, question)
             else:
-                return await self.predict_conversation(question, answer)
+                return self.predict_conversation(question, answer)
         elif "cot" in self.mode or "fewshot" in self.mode:
-            return await self.predict_standard(examples, question)
+            return self.predict_standard(examples, question)
         else:
             raise ValueError("Invalid mode")

@@ -55,9 +55,9 @@ class Dataset:
         self.dataset_name = dataset_name
 
 class GSM8K(Dataset):
-    def __init__(self):
+    def __init__(self, split = "test"):
         self.dataset_name = "gsm8k"
-        self.split = "test"
+        self.split = split
         self.subset = "main"
         self.hf_name = "openai/gsm8k"
         self.dataset = datasets.load_dataset(self.hf_name, self.subset, streaming = True)[self.split]
@@ -79,6 +79,15 @@ class DialougeDataset:
     
     def __getitem__(self, idx):
         return self.conversations[idx]
+
+    def get_dialouge(self, flatten = False):
+        conversations = []
+        for conversation in self.conversations:
+            dialouge = []
+            for turn in conversation.dialouge:
+                dialouge.append({"role": 'user' if turn['role'] == 'student' else 'assistant', "content": turn['content']})
+            conversations.append(dialouge)
+        return conversations
 
 class StepVerify(DialougeDataset):
     def __init__(self, subset = 'train'):
