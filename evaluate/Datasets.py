@@ -5,6 +5,10 @@ import zipfile
 import os
 import hashlib
 import datasets
+
+import re
+from itertools import islice
+
 class Problem:
     def __init__(self, text = '', img = None):
         self.text = text
@@ -209,6 +213,79 @@ class CoMTA(DialougeDataset):
                 dialouge.append({"role": "tutor", "content": "that is incorrect"})
             self.conversations.append(Conversation(dialouge = dialouge, topic = topic))
 
+class TutorChat(DialougeDataset):
+    """
+    TutorChat – 80 k synthetic teacher–student conversations ⟨hf: princeton‑nlp/TutorChat⟩
+    """
+    HF_NAME = "princeton-nlp/TutorChat"          
+    ROLE_MAP = {"assistant": "tutor",
+                "teacher": "tutor",
+                "user": "student",
+                "student": "student"}
+
+    def __init__(self, subset: str = "train"):
+        super().__init__(subset=subset)
+
+        raw = datasets.load_dataset(self.HF_NAME,
+                                    split=self.subset,
+                                    streaming=True)
+                      
+        self.conversations: list[Conversation] = []
+        for row in islice(raw, None):         
+            dialogue = self._row_to_dialogue(row)
+            topic = ": ".join(row.get("textbook_folder", "").split("/")[1:4]).strip(': ')
+            
+            self.conversations.append(
+                Conversation(topic=topic, dialouge=dialogue))
+            
+    def _row_to_dialogue(self, row) -> list[dict]:
+        conv = row["conversation"] if "conversation" in row else None
+        if conv and isinstance(conv, list):          
+            mode = row.get("mode", "")
+            dialogue = []
+            for i, turn in enumerate(conv):
+                # In open‑book mode the first element is the chapter snippet – skip it
+                if mode == "openbook" and i == 0:
+                    continue
+                role = "assistant" if i % 2 == 0 else "user"
+                dialogue.append({"role": self.ROLE_MAP[role], "content": turn})
+            return dialogue
+
+
+
+class TutorEval(Dataset):
+    """
+    TutorEval – 834 expert‑written questions about long textbook
+    chapters; supports open‑book / closed‑book flags. ⟨hf: princeton‑nlp/TutorEval⟩
+    """
+    HF_NAME = "princeton-nlp/TutorEval"    
+
+    def __init__(self, split: str = "train"):
+        super().__init__("tutoreval")
+        self.split = split
+        self.dataset = datasets.load_dataset(self.HF_NAME,
+                                             split=self.split,
+                                             streaming=True)
+        
+    def process_dataset(self):
+        def _simplify(x):
+            return {
+                "id": hash_question(x["question"]),
+                "chapter": x["chapter"],
+                "question": x["question"],
+                "key_points": x["key_points"],
+                "closed_book": x["closed_book"],
+                "answer_in_chapter": x["answer_in_chapter"],
+                "misleading_question": x["misleading_question"],
+                "difficulty": x["difficulty"],
+                "domain": x["domain"],
+                "path_to_chapter": x["path_to_chapter"],
+            }
+
+        self.dataset = self.dataset.map(_simplify)
+        return self.dataset  
+    
+    
 def load_dataset(dataset_name):
     if dataset_name == 'stepwise_verify':
         return StepVerify()
@@ -220,6 +297,12 @@ def load_dataset(dataset_name):
         return Cima()
     elif dataset_name == 'comta':
         return CoMTA()
+    elif dataset_name == 'tutor_chat':
+        return TutorChat()
+    elif dataset_name == 'tutor_eval':
+        return TutorEval()
+    elif dataset_name == 'gsm8k':
+        return GSM8K()
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
@@ -242,3 +325,23 @@ def load_dataset(dataset_name):
 # print('CoMTA')
 # dataset = load_dataset('comta')
 # print(dataset.conversations[0])
+
+print('TutorChat')
+dataset = load_dataset('tutor_chat')
+print(dataset.conversations[0])
+
+# print('TutorEval')
+# dataset = load_dataset('tutor_eval')
+# dataset = dataset.process_dataset()
+# for i, item in enumerate(dataset):
+#     print(f"ID: {item['id']}")
+#     print(f"Question: {item['question']}")
+#     print(f"Key Points: {item['key_points']}")
+#     print(f"Closed Book: {item['closed_book']}")
+#     print(f"Answer in Chapter: {item['answer_in_chapter']}")
+#     print(f"Misleading Question: {item['misleading_question']}")
+#     print(f"Difficulty: {item['difficulty']}")
+#     print(f"Domain: {item['domain']}")
+#     print(f"Path to Chapter: {item['path_to_chapter']}")
+#     print('--------------------------------')
+#     break
