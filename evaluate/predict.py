@@ -117,7 +117,7 @@ def get_ollama_models(self):
 class UnslothLLM:
     def __init__(self, model_name: str = "unsloth/gemma-3-4B-it"):
         self.model_name = model_name
-        print('loading check point for ', self.model_name)
+        print('loading checkpoint for ', self.model_name)
         self.model, _ = FastModel.from_pretrained(
             model_name = self.model_name,
             max_seq_length = 2048, # Choose any for long context!
@@ -126,34 +126,25 @@ class UnslothLLM:
             full_finetuning = False, # [NEW!] We have full finetuning now!
         )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        print('check point loaded')
+        print('checkpoint loaded')
 
     def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
         text = self.tokenizer.apply_chat_template(
             contexts,
             tokenize=False,
             add_generation_prompt=True,
-            enable_thinking=True # Switches between thinking and non-thinking modes. Default is True.
+            enable_thinking=False # Switches between thinking and non-thinking modes. Default is True.
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
 
         # conduct text completion
         generated_ids = self.model.generate(
             **model_inputs,
-            max_new_tokens=32768
+            max_new_tokens=1024
         )
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
 
-        # parsing thinking content
-        try:
-            # rindex finding 151668 (</think>)
-            index = len(output_ids) - output_ids[::-1].index(151668)
-        except ValueError:
-            index = 0
-
-        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
-        return content
+        return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
     
     def fine_tune(self, dataset: List[Dict[str, Any]]):
         conversations = dataset.get_dialouge()
@@ -287,15 +278,14 @@ class LLMGenerator:
             {"role": "assistant", "content": question},
         ]
         conversation = [{"role": "assistant", "content": question}]
-        if log:
-            print("")
-        for _ in range(max_turns):
+        for turn_id in range(max_turns):
             response = self.student_model.get_llm_response(student_messages)
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
             if log:
+                print("Turn ID: ", turn_id)
                 print("Tutor: ", conversation[-2]["content"])
                 print("Student: ", conversation[-1]["content"])
             response = self.tutor_model.get_llm_response(tutor_messages)
