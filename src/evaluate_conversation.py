@@ -16,7 +16,7 @@ def main():
 
     dataset = StepVerify()
     dialouges = dataset.get_dialouge()
-    results = judge.evaluate(dialouges)
+    results = judge.evaluate(dialouges[:10])
     print(results)
 
     

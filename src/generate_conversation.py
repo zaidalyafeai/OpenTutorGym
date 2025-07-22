@@ -22,12 +22,14 @@ def main():
     dataset = GSM8K(split = args.split)
     dataset = dataset.process_dataset()
 
-    for problem in dataset:
+    for i, problem in tqdm(enumerate(dataset), total=10):
         answer, conversation = predictor.predict_conversation(
             problem["question"],
             log = True
         )
-        
+        if i == 10:
+            break
+
     # evaluate
     
 if __name__ == "__main__":
