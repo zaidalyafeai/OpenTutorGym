@@ -5,9 +5,9 @@ output/*
 results/*
 ollama-inference.py
 optim.py
-evaluate/results*
-evaluate/data/*
-evaluate/examples/*
+src/results*
+src/data/*
+src/examples/*
 dcgm/
 .cache/
 
