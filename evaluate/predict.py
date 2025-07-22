@@ -11,6 +11,9 @@ from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import multiprocessing
 import os
+import json
+from tqdm import tqdm
+
 _original_cpu_count = multiprocessing.cpu_count
 multiprocessing.cpu_count = lambda: 1
 
@@ -33,86 +36,77 @@ class ExtractedAnswer(BaseModel):
 # Model type constants
 GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
 DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
-GEMINI_LLMS = ["google/gemini-flash-1.5", "deepseek/deepseek-v3-base:free", "google/gemini-2.5-pro-exp-03-25:free"]
+GEMINI_LLMS = ["google/gemini-flash-1.5"]
+GEMMA_LLMS = ["google/gemma-3-27b-it"]
 VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
-API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS
+API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS + GEMMA_LLMS
+
 UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B", "unsloth/Qwen3-30B-A3B-GGUF", "unsloth/Qwen3-14B"]
 
-class LLMTutorJudge:
-    def __init__(self, model: str = "openai/gpt-4o-mini"):
-        self.model = model
-        self.system_prompt ="""You are given a conversation between a student and a tutor that solves a question. 
-        You need to judge the correctness and helpfulness of the tutor's response. Also reason about the correctness and helpfulness of the tutor's response.
-        {
-        "correctness": <true or false answer>,
-        "helpfulness": <true or false answer>,
-        "reasoning": <reasoning>
-        }"""
 
-    def get_response(self, prompt: str) -> str:
-        
-        client = OpenAI(api_key=os.environ.get("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "system", "content": self.system_prompt}, {"role": "user", "content": prompt}],
-        )
-        content = response.choices[0].message.content
-        content = content.replace("```json", "").replace("```", "")
-        return JudgeResponse.parse_raw(content)
-    
-class LLMJudge:
-    def __init__(self, model: str = "openai/gpt-4o-mini"):
-        self.model = model
-
-    def get_response_router(self, prompt: str) -> str:
-        
-        client = OpenAI(api_key=os.environ.get("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
-        response = client.beta.chat.completions.parse(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            response_format=ExtractedAnswer,
-        )
-        return response.choices[0].message.parsed
-    
-    def get_response_vllm(self, prompt: str) -> str:
-        client = OpenAI(api_key="EMPTY", base_url="http://localhost:8080/v1")
-        response = client.beta.chat.completions.parse(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            response_format=ExtractedAnswer,
-        )
-        return response.choices[0].message.parsed
-    
-    def get_response(self, prompt: str) -> str:
-        if "Qwen" in self.model:
-            return self.get_response_vllm(prompt)
+class Evaluator:
+    def __init__(self, model: str = "openai/gpt-4o-mini", metric = 'correctness_helpfulness'):
+        self.model = APILLM(model)
+        self.metric = metric
+        if metric == 'correctness_helpfulness':
+            self.metrics = {'correctness': 0.0, 'helpfulness': 0.0}
+            self.system_prompt ="""You are given a conversation between a student and a tutor that solves a question. 
+            You need to judge the correctness and helpfulness of the tutor's response.
+            {
+            "reasoning": <reasoning>,
+            "correctness": 0-100 score for the correctness of the tutor's response,
+            "helpfulness": 0-100 score for the helpfulness of the tutor's response,
+            }"""
         else:
-            return self.get_response_router(prompt)
+            raise ValueError(f"Invalid metric: {metric}")
 
-def get_ollama_models(self):
-        """Return available models from Ollama and API providers"""
-        models = ["Human"]
-
-        # Get Ollama models
+    def evaluate_conversation(self, contexts: List[Dict[str, Any]]) -> str:
+        response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}] + contexts)
         try:
-            models_info = ollama.list()
-            if "models" in models_info:
-                # Sort models by size in decreasing order
-                sorted_models = sorted(
-                    models_info["models"], key=lambda x: x.get("size", 0), reverse=False
-                )
-                # Extract just the model names from the sorted list
-                models.extend([model["model"] for model in sorted_models])
+            return self.parse_response(response)
         except Exception as e:
-            print(f"Error fetching Ollama models: {e}")
+            return {metric: 0.0 for metric in self.metrics}
+    
+    def evaluate(self, dialouges: List[Dict[str, Any]]) -> str:
+        pbar = tqdm(dialouges)
+        for i, dialouge in enumerate(pbar):
+            response = self.evaluate_conversation(dialouge)
+            pbar_text = ""
+            for metric in self.metrics:
+                self.metrics[metric] += response[metric]/len(dialouges)
+                pbar_text += f"{metric}: {(self.metrics[metric]*len(dialouges))/(i+1):.2f} "
+            pbar.set_description(pbar_text)
+        return self.metrics
+    
+    def parse_response(self, response: str) -> Dict[str, Any]:
+        response = response.replace("```json", "").replace("```", "").strip()
+        return json.loads(response)
+    
 
-        # Add API models
-        try:
-            models.extend(self.API_LLMS)
-        except Exception as e:
-            print(f"Error adding API models: {e}")
+def get_ollama_models():
+    """Return available models from Ollama and API providers"""
+    models = ["Human"]
 
-        return models
+    # Get Ollama models
+    try:
+        models_info = ollama.list()
+        if "models" in models_info:
+            # Sort models by size in decreasing order
+            sorted_models = sorted(
+                models_info["models"], key=lambda x: x.get("size", 0), reverse=False
+            )
+            # Extract just the model names from the sorted list
+            models.extend([model["model"] for model in sorted_models])
+    except Exception as e:
+        print(f"Error fetching Ollama models: {e}")
+
+    # Add API models
+    try:
+        models.extend(self.API_LLMS)
+    except Exception as e:
+        print(f"Error adding API models: {e}")
+
+    return models
 
 class UnslothLLM:
     def __init__(self, model_name: str = "unsloth/gemma-3-4B-it"):
@@ -189,15 +183,13 @@ class UnslothLLM:
         trainer_stats = trainer.train()
         return trainer_stats
 
-    
-
 class APILLM:
 
     def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8000"):
         self.model = model
         self.port = port
 
-    def get_llm_response(self, str, contexts: List[Dict[str, Any]]) -> str:
+    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
         """Get response from LLM based on model type"""
         api_key = ""
         api_base = ""
@@ -278,22 +270,31 @@ class LLMGenerator:
             {"role": "assistant", "content": question},
         ]
         conversation = [{"role": "assistant", "content": question}]
+
+        if log:
+            print("Question: ", question)
+
         for turn_id in range(max_turns):
+            if log:
+                print("Turn ID: ", turn_id)
             response = self.student_model.get_llm_response(student_messages)
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
             if log:
-                print("Turn ID: ", turn_id)
-                print("Tutor: ", conversation[-2]["content"])
                 print("Student: ", conversation[-1]["content"])
+
             response = self.tutor_model.get_llm_response(tutor_messages)
             conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
 
+            if log:
+                print("Tutor: ", conversation[-1]["content"])
+
             if "<END>" in response:
+                print("--------------------------------")
                 break
                 
         return conversation[-2]["content"], conversation
