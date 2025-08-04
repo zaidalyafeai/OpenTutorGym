@@ -81,6 +81,63 @@ class Evaluator:
             "reasoning": <reasoning>,
             "revealing_answer": 0-100 score for the revealing answer of the tutor's response,
             }"""
+
+        elif metric == 'mistake_identification':
+            self.metrics = {'Mistake_Identification': []}
+            self.system_prompt = """You are given a conversation. 
+            Has the tutor identified a mistake in the student’s response?
+            Return:
+            {
+            "Mistake_Identification": "Yes/To some extent/No"
+            }"""
+
+        elif metric == 'revealing_of_the_answer':
+            self.metrics = {'Revealing_of_the_Answer': []}
+            self.system_prompt = """You are given a conversation. 
+            Does the tutor reveal the final answer?
+            Return:
+            {
+            "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No"
+            }"""
+
+        elif metric == 'providing_guidance':
+            self.metrics = {'Providing_Guidance': []}
+            self.system_prompt = """You are given a conversation. 
+            Does the tutor offer correct and relevant guidance?
+            Return:
+            {
+            "Providing_Guidance": "Yes/To some extent/No"
+            }"""
+
+        elif metric == 'tutor_tone':
+            self.metrics = {'Tutor_Tone': []}
+            self.system_prompt = """You are given a conversation. 
+            What is the tone of the tutor’s response?
+            Return:
+            {
+            "Tutor_Tone": "Encouraging/Neutral/Offensive"
+            }"""
+
+        elif metric == 'all':
+            self.metrics = {
+                "correctness": 0.0,
+                "helpfulness": 0.0,
+                "Mistake_Identification": [],
+                "Revealing_of_the_Answer": [],
+                "Providing_Guidance": [],
+                "Tutor_Tone": []
+            }
+            self.system_prompt = """You are given a conversation. Evaluate the tutor's response:
+            {
+            "reasoning": <explanation>,
+            "correctness": 0-100,
+            "helpfulness": 0-100,
+            "Mistake_Identification": "Yes/To some extent/No",
+            "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No",
+            "Providing_Guidance": "Yes/To some extent/No",
+            "Tutor_Tone": "Encouraging/Neutral/Offensive"
+            }"""
+
         else:
             raise ValueError(f"Invalid metric: {metric}")
 
