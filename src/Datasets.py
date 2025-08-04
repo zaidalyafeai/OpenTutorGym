@@ -213,6 +213,26 @@ class CoMTA(DialougeDataset):
                 dialouge.append({"role": "tutor", "content": "that is incorrect"})
             self.conversations.append(Conversation(dialouge = dialouge, topic = topic))
 
+class SocraTeach(DialougeDataset):
+    def __init__(self, subset = 'train'):
+        self.subset = subset
+        path = 'https://raw.githubusercontent.com/Ljyustc/SocraticLM/refs/heads/main/data/SocraTeach_multi.json'
+        self.conversations = []
+        data = json.loads(requests.get(path).text)
+        for item in data:
+            items = data[item]
+            question = items['question']
+            solution = items['answer']
+            
+            for key in items['dialogues']:
+                dialouge = []
+                for turn in items['dialogues'][key]:
+                    if "system" in turn:
+                        dialouge.append({"role": "tutor", "content": turn['system']})
+                    if "user" in turn:
+                        dialouge.append({"role": "student", "content": turn['user']})
+                self.conversations.append(Conversation(problem = Problem(text = question), solution = solution, dialouge = dialouge))
+
 class TutorChat(DialougeDataset):
     """
     TutorChat – 80 k synthetic teacher–student conversations ⟨hf: princeton‑nlp/TutorChat⟩
@@ -303,6 +323,8 @@ def load_dataset(dataset_name):
         return TutorEval()
     elif dataset_name == 'gsm8k':
         return GSM8K()
+    elif dataset_name == 'socra_teach':
+        return SocraTeach()
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
@@ -346,3 +368,8 @@ if __name__ == "__main__":
         print(f"Path to Chapter: {item['path_to_chapter']}")
         print('--------------------------------')
         break
+
+    print('SocraTeach')
+    dataset = load_dataset('socra_teach')
+    print(dataset.conversations[0])
+    
