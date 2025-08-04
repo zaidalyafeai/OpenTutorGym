@@ -5,14 +5,18 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from typing import Literal
-from unsloth import FastLanguageModel, FastModel
-from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import multiprocessing
 import os
 import json
 from tqdm import tqdm
+
+try:
+    from unsloth import FastLanguageModel, FastModel
+    from trl import SFTTrainer, SFTConfig
+except Exception as e:
+    print(f"Error importing unsloth: no gpu found")
 
 _original_cpu_count = multiprocessing.cpu_count
 multiprocessing.cpu_count = lambda: 1
@@ -57,26 +61,52 @@ class Evaluator:
             "correctness": 0-100 score for the correctness of the tutor's response,
             "helpfulness": 0-100 score for the helpfulness of the tutor's response,
             }"""
+        elif metric == 'instruction_following':
+            self.metrics= {'instruction_following': 0.0}
+            self.system_prompt = """You are a tutor that needs to evaluate the instruction following of the student's response. 
+            Give a high score if the student is follwing the tips given by the tutor. 
+            Give a low score if the student flips roles or ask the tutor to solve the problem.
+            {
+            "reasoning": <reasoning>,
+            "instruction_following": 0-100 score for the instruction following of the student's response,
+            }"""
+        elif metric == 'revealing_answer':
+            self.metrics= {'revealing_answer': 0.0}
+            self.system_prompt = """You are given a conversation between a student and a tutor on a given problem.
+            You will evaluate if the tutor is revelaing the answer to the student prematurely.
+            Give a high score of 100 if the tutor is only given tips without revealing the solution.
+            Give a low score of 0 if the tutor is revealing the answer to the student explicitly.
+            The tutor should not reveal the answer to the student until the student has solved the problem.
+            {
+            "reasoning": <reasoning>,
+            "revealing_answer": 0-100 score for the revealing answer of the tutor's response,
+            }"""
         else:
             raise ValueError(f"Invalid metric: {metric}")
 
     def evaluate_conversation(self, contexts: List[Dict[str, Any]]) -> str:
-        response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}] + contexts)
+        query = "" 
+        for turn in contexts:
+            query += f"{turn['role'].replace('user', 'student').replace('assistant', 'tutor')}: {turn['content']}\n" 
+        print(query)
+        response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}, {"role": "user", "content": query}])
         try:
             return self.parse_response(response)
         except Exception as e:
             return {metric: 0.0 for metric in self.metrics}
     
     def evaluate(self, dialouges: List[Dict[str, Any]]) -> str:
+        results = {metric: [] for metric in self.metrics}
         pbar = tqdm(dialouges)
         for i, dialouge in enumerate(pbar):
             response = self.evaluate_conversation(dialouge)
             pbar_text = ""
             for metric in self.metrics:
-                self.metrics[metric] += response[metric]/len(dialouges)
-                pbar_text += f"{metric}: {(self.metrics[metric]*len(dialouges))/(i+1):.2f} "
+                results[metric].append(response[metric])
+                average = sum(results[metric])/len(results[metric])
+                pbar_text += f"{metric}: {average:.2f} "
             pbar.set_description(pbar_text)
-        return self.metrics
+        return results
     
     def parse_response(self, response: str) -> Dict[str, Any]:
         response = response.replace("```json", "").replace("```", "").strip()

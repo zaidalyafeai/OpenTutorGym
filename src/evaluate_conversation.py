@@ -12,14 +12,37 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    judge = Evaluator(args.judge_model)
+    judge = Evaluator(args.judge_model, metric='instruction_following')
 
     dataset = StepVerify()
-    dialouges = dataset.get_dialouge()
-    results = judge.evaluate(dialouges[:10])
-    print(results)
+    dialouges = dataset.get_dialouge()[:10]
+    sample_conversation = [
+        [
+            {"role": "assistant", "content": "What is 2 * 3 + 3?"},
+            {"role": "user", "content": "I don't know. Can you help me?"},
+            {"role": "assistant", "content": "Sure, think about the order of operations. What is 2 * 3?"},
+            {"role": "user", "content": "6, what's next?"},
+            {"role": "assistant", "content": "What is the next operation?"},
+            {"role": "user", "content": "I need to add 3 to 6, so the answer is 9."},
+            {"role": "assistant", "content": "Great! You got it right."},
+        ],
 
-    
+        [
+            {"role": "assistant", "content": "What is 2 * 3 + 3?"},
+            {"role": "user", "content": "Solve the problem 2 * 3 + 3"},
+            {"role": "assistant", "content": "Sure, think about the order of operations. What is 2 * 3?"},
+            {"role": "user", "content": "Great attempt you need first to multiply 2 and 3, then add 3 to the result."},
+            {"role": "assistant", "content": "Great! how to solve the problem?"},
+            {"role": "user", "content": "Please solve the problem. I don't know how to solve it."},
+            {"role": "assistant", "content": "Sure, the answer is 9."},
+        ]
+    ]
+    results = judge.evaluate(sample_conversation)
+    print(results)
+    judge = Evaluator(args.judge_model, metric='revealing_answer')
+    results = judge.evaluate(sample_conversation)   
+
+    print(results)
 if __name__ == "__main__":
 
     # asyncio.run(main())
