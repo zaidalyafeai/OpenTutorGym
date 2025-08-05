@@ -23,10 +23,14 @@ def main():
     dataset = dataset.process_dataset()
 
     for i, problem in tqdm(enumerate(dataset), total=10):
-        answer, conversation = predictor.predict_conversation(
+        output = []
+        for conversation in predictor.predict_conversation(
             problem["question"],
+            stream = False,
             log = True
-        )
+        ):
+            output.append(conversation)
+        print(output[-1])
         if i == 10:
             break
 

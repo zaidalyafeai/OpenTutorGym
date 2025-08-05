@@ -11,6 +11,8 @@ import multiprocessing
 import os
 import json
 from tqdm import tqdm
+import time
+from transformers import TextStreamer
 
 try:
     from unsloth import FastLanguageModel, FastModel
@@ -209,7 +211,7 @@ class UnslothLLM:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         print('checkpoint loaded')
 
-    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
+    def get_llm_response(self, contexts: List[Dict[str, Any]], stream: bool = False) -> str:
         text = self.tokenizer.apply_chat_template(
             contexts,
             tokenize=False,
@@ -217,21 +219,29 @@ class UnslothLLM:
             enable_thinking=False # Switches between thinking and non-thinking modes. Default is True.
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
+        if stream:
+            streamer = TextStreamer(self.tokenizer, skip_prompt=True)
+            generated_ids = self.model.generate(
+            **model_inputs,
+            max_new_tokens=1024,
+            streamer=streamer
+        )
+        else:
+            generated_ids = self.model.generate(
+            **model_inputs,
+            max_new_tokens=1024)
 
         # conduct text completion
-        generated_ids = self.model.generate(
-            **model_inputs,
-            max_new_tokens=1024
-        )
+        
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
 
-        return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
-    
-    def fine_tune(self, dataset: List[Dict[str, Any]]):
-        conversations = dataset.get_dialouge()
+        for char in self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"):
+            yield char
+            time.sleep(0.01)
+
+    def finetune(self, conversations: List[Dict[str, Any]]):
         conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
         conversations = Dataset.from_list(conversations)
-        print(conversations)
         model = FastLanguageModel.get_peft_model(
             self.model,
             r = 32,           # Choose any number > 0! Suggested 8, 16, 32, 64, 128
@@ -269,6 +279,18 @@ class UnslothLLM:
         )
         trainer_stats = trainer.train()
         return trainer_stats
+
+# class DummyLM:
+#     def __init__(self, model_name: str):
+#         self.model_name = model_name
+#     def get_llm_response(self, contexts: List[Dict[str, Any]], stream: bool = False) -> str:
+#         if stream:
+#             sentence = "Hi, I am here"
+#             for char in sentence:
+#                 time.sleep(0.1)
+#                 yield char
+#         else:
+#             return "Hi, I am here"
 
 class APILLM:
 
@@ -326,6 +348,7 @@ class LLMGenerator:
         language: str = "English",
         student_level: str = "Middle School",
         max_turns: int = 20,
+        stream: bool = False,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
         """Generate a conversation between a student and a math tutor"""
@@ -364,28 +387,30 @@ class LLMGenerator:
         for turn_id in range(max_turns):
             if log:
                 print("Turn ID: ", turn_id)
-            response = self.student_model.get_llm_response(student_messages)
-            conversation.append({"role": "Student", "content": response})
+
+            conversation.append({"role": "Student", "content": ""})
+            response = ""
+            for chunk in self.student_model.get_llm_response(student_messages, stream = stream):
+                response += chunk
+                conversation[-1]["content"] += chunk
+                yield conversation.copy()
+            
+            
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
-            if log:
-                print("Student: ", conversation[-1]["content"])
+            conversation.append({"role": "Tutor", "content": ""})
+            response = ""
+            for chunk in self.tutor_model.get_llm_response(tutor_messages, stream = stream):
+                response += chunk
+                conversation[-1]["content"] += chunk
+                yield conversation.copy()
 
-            response = self.tutor_model.get_llm_response(tutor_messages)
-            conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
-
-            if log:
-                print("Tutor: ", conversation[-1]["content"])
-
             if "<END>" in response:
-                print("--------------------------------")
                 break
-                
-        return conversation[-2]["content"], conversation
-
+            turn_id += 1
         
     def predict_standard(self, examples: List[Dict[str, Any]], question: str = None):
         """Make a few-shot prediction based on examples"""
