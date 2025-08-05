@@ -84,12 +84,15 @@ class DialougeDataset:
     def __getitem__(self, idx):
         return self.conversations[idx]
 
-    def get_dialouge(self, flatten = False):
+    def get_dialouge(self, flip = False):
         conversations = []
         for conversation in self.conversations:
             dialouge = []
             for turn in conversation.dialouge:
-                dialouge.append({"role": 'user' if turn['role'] == 'student' else 'assistant', "content": turn['content']})
+                if flip:
+                    dialouge.append({"role": 'assistant' if turn['role'] == 'student' else 'user', "content": turn['content']})
+                else:
+                    dialouge.append({"role": 'assistant' if turn['role'] == 'tutor' else 'user', "content": turn['content']})
             conversations.append(dialouge)
         return conversations
 
