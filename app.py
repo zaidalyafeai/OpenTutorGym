@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Generator
 import os
 import dotenv
 from openai import OpenAI
+from src.predict import LLMGenerator, UnslothLLM
 dotenv.load_dotenv()
 
 GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
@@ -14,22 +15,9 @@ API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS
 
 gr.set_static_paths(paths=["assets/"])
 
-def get_ollama_response(model: str, contexts: List[Dict[str, Any]]) -> Generator[str, None, None]:
-    """Get streaming response from Ollama model"""
-    response = ollama.chat(
-        model=model,
-        messages=contexts,
-        stream=True
-    )
-    
-    for chunk in response:
-        if 'message' in chunk and 'content' in chunk['message']:
-            yield chunk['message']['content']
-        time.sleep(0.01)  # Small delay for smoother streaming
 
 def get_chatgpt_response(model: str, contexts: List[Dict[str, Any]]) -> Generator[str, None, None]:
     """Get streaming response from ChatGPT API"""
-
 
     if model in API_LLMS:
         api_key = os.environ.get("OPENROUTER_API_KEY")
@@ -51,12 +39,6 @@ def get_chatgpt_response(model: str, contexts: List[Dict[str, Any]]) -> Generato
         if chunk.choices and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content
 
-def get_llm_response(model: str, contexts: List[Dict[str, Any]]) -> Generator[str, None, None]:
-    """Get streaming response from LLM"""
-    if model in API_LLMS:
-        return get_chatgpt_response(model, contexts)
-    else:
-        return get_ollama_response(model, contexts)
 
 def agent_conversation(
     student_model: str,
@@ -156,38 +138,11 @@ def agent_conversation(
         if human_text != "":
             break
 
-def get_available_models():
-    models = ['Human']
-    
-    # Get Ollama models
-    try:
-        models_info = ollama.list()
-        if 'models' in models_info:
-            # Sort models by size in decreasing order
-            sorted_models = sorted(
-                models_info['models'], 
-                key=lambda x: x.get('size', 0), 
-                reverse=False
-            )
-            # Extract just the model names from the sorted list
-            models.extend([model['model'] for model in sorted_models])
-    except Exception as e:
-        print(f"Error fetching Ollama models: {e}")
-    
-    # Add ChatGPT models
-    try:
-        models.extend(API_LLMS)
-        
-    except Exception as e:
-        print(f"Error adding ChatGPT models: {e}")
-    
-    return models
-
 def create_app():
     # Get available models when app starts
-    available_models = get_available_models()
-    default_student_model = "gemma2:27b"
-    default_tutor_model = "gemma2:27b"
+    available_models = ["unsloth/Qwen3-4B", "unsloth/Qwen3-14B"]
+    default_student_model = "unsloth/Qwen3-4B"
+    default_tutor_model = "unsloth/Qwen3-4B"
     
     # Define math problems with their solutions
     math_problems = [
@@ -210,12 +165,12 @@ def create_app():
     
         with gr.Row():
             with gr.Column():
-                student_model = gr.Dropdown(
+                student_model_name = gr.Dropdown(
                     choices=available_models, 
                     value=default_student_model,
                     label="Student Model"
                 )
-                tutor_model = gr.Dropdown(
+                tutor_model_name = gr.Dropdown(
                     choices=available_models, 
                     value=default_tutor_model,
                     label="Tutor Model"
@@ -233,22 +188,14 @@ def create_app():
                     value=f"{math_problems[0]['question']} | Solution: {math_problems[0]['solution']}",
                     label="Math Problem",
                 )
-                # Remove solution field
-                max_turns = gr.Slider(
-                    minimum=1, 
-                    maximum=20, 
-                    value=20, 
-                    step=1, 
-                    label="Max Turns",
-                    visible=False
-                )
+                
                 language = gr.Dropdown(
                     choices=["English", "Arabic"],
                     value="English",
                     label="Language"
                 )
         
-        start_btn = gr.Button("Start A Tutoring Session")
+        start_btn = gr.Button("Start A Tutoring Session", interactive=True)
         
         chatbot = gr.Chatbot(
             avatar_images=('assets/student.png','assets/tutor.png'),
@@ -265,13 +212,21 @@ def create_app():
             else:
                 return [gr.Textbox(visible=0), gr.Button(visible=1)]
         
-        student_model.change(update_visibility, student_model, [human_text, start_btn])
+        def enable():
+            return gr.Button("Start A Tutoring Session", interactive=True)
         
-        def start_conversation(student, tutor, problem_with_solution, language, human_text, human_conversation, tutor_conversation, student_level):
+        student_model_name.change(update_visibility, student_model_name, [human_text, start_btn])
+        
+        # wait for models to load
+        student_model = UnslothLLM(student_model_name.value)
+        tutor_model = UnslothLLM(tutor_model_name.value)
+        # start_btn.click(enable)
+
+        def start_conversation(problem_with_solution, language, human_text, human_conversation, tutor_conversation):
             # Parse the problem and solution from the dropdown value
+            predictor = LLMGenerator(student_model=student_model, tutor_model=tutor_model)
             question, solution = problem_with_solution.split(" | Solution: ")
-            
-            for messages in agent_conversation(student, tutor, question, solution, language, human_text, human_conversation, tutor_conversation, student_level):
+            for messages in predictor.predict_conversation(question, language, student_level, max_turns = 20):
                 formatted_messages = []
                 for msg in messages:
                     if msg["role"] == "Student":
@@ -285,13 +240,13 @@ def create_app():
         
         start_btn.click(
             start_conversation,
-            inputs=[student_model, tutor_model, problem_dropdown, language, human_text, human_conversation, tutor_conversation, student_level],
+            inputs=[problem_dropdown, language, human_text, human_conversation, tutor_conversation],
             outputs=chatbot
         )
 
         human_text.submit(
             start_conversation,
-            inputs=[student_model, tutor_model, problem_dropdown, language, human_text, human_conversation, tutor_conversation, student_level],
+            inputs=[problem_dropdown, language, human_text, human_conversation, tutor_conversation],
             outputs=[chatbot, human_text]  # Add human_text to outputs
         )
     
@@ -303,5 +258,6 @@ if __name__ == "__main__":
     demo.launch(
         debug=True,         # Enables debugging features
         server_name="0.0.0.0",  # Makes the server accessible from other devices on the network
-        server_port=7777
+        server_port=7777,
+        share=True
     )
