@@ -5,20 +5,14 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from typing import Literal
+from unsloth import FastLanguageModel, FastModel
+from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import multiprocessing
 import os
 import json
 from tqdm import tqdm
-import time
-from transformers import TextStreamer
-
-try:
-    from unsloth import FastLanguageModel, FastModel
-    from trl import SFTTrainer, SFTConfig
-except Exception as e:
-    print(f"Error importing unsloth: no gpu found")
 
 _original_cpu_count = multiprocessing.cpu_count
 multiprocessing.cpu_count = lambda: 1
@@ -51,121 +45,174 @@ UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B", "unsloth/Qwen3-30B-
 
 
 class Evaluator:
-    def __init__(self, model: str = "openai/gpt-4o-mini", metric = 'correctness_helpfulness'):
+    def __init__(self, model: str = "openai/gpt-4o-mini", 
+    metric = 'correctness_helpfulness',
+    eval_teacher: bool = True,
+    eval_student: bool = False):
+
+
         self.model = APILLM(model)
         self.metric = metric
-        if metric == 'correctness_helpfulness':
-            self.metrics = {'correctness': 0.0, 'helpfulness': 0.0}
-            self.system_prompt ="""You are given a conversation between a student and a tutor that solves a question. 
-            You need to judge the correctness and helpfulness of the tutor's response.
-            {
-            "reasoning": <reasoning>,
-            "correctness": 0-100 score for the correctness of the tutor's response,
-            "helpfulness": 0-100 score for the helpfulness of the tutor's response,
-            }"""
-        elif metric == 'instruction_following':
-            self.metrics= {'instruction_following': 0.0}
-            self.system_prompt = """You are a tutor that needs to evaluate the instruction following of the student's response. 
-            Give a high score if the student is follwing the tips given by the tutor. 
-            Give a low score if the student flips roles or ask the tutor to solve the problem.
-            {
-            "reasoning": <reasoning>,
-            "instruction_following": 0-100 score for the instruction following of the student's response,
-            }"""
-        elif metric == 'revealing_answer':
-            self.metrics= {'revealing_answer': 0.0}
-            self.system_prompt = """You are given a conversation between a student and a tutor on a given problem.
-            You will evaluate if the tutor is revelaing the answer to the student prematurely.
-            Give a high score of 100 if the tutor is only given tips without revealing the solution.
-            Give a low score of 0 if the tutor is revealing the answer to the student explicitly.
-            The tutor should not reveal the answer to the student until the student has solved the problem.
-            {
-            "reasoning": <reasoning>,
-            "revealing_answer": 0-100 score for the revealing answer of the tutor's response,
-            }"""
 
-        elif metric == 'mistake_identification':
-            self.metrics = {'Mistake_Identification': []}
-            self.system_prompt = """You are given a conversation. 
-            Has the tutor identified a mistake in the student’s response?
-            Return:
-            {
-            "Mistake_Identification": "Yes/To some extent/No"
-            }"""
+        if eval_teacher:
+            if metric == 'correctness_helpfulness':
+                self.metrics = {'correctness': 0.0, 'helpfulness': 0.0}
+                self.system_prompt = """You are given a conversation between a student and a tutor that solves a question. 
+                You need to judge the correctness and helpfulness of the tutor's response.
+                Return:
+                {
+                "reasoning": <reasoning>,
+                "correctness": 0-100 score for the correctness of the tutor's response,
+                "helpfulness": 0-100 score for the helpfulness of the tutor's response
+                }"""
 
-        elif metric == 'revealing_of_the_answer':
-            self.metrics = {'Revealing_of_the_Answer': []}
-            self.system_prompt = """You are given a conversation. 
-            Does the tutor reveal the final answer?
-            Return:
-            {
-            "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No"
-            }"""
+            elif metric == 'mistake_identification':
+                self.metrics = {'Mistake_Identification': []}
+                self.system_prompt = """You are given a conversation. 
+                Has the tutor identified a mistake in the student’s response?
+                Return:
+                {
+                "Mistake_Identification": "Yes/To some extent/No"
+                }"""
 
-        elif metric == 'providing_guidance':
-            self.metrics = {'Providing_Guidance': []}
-            self.system_prompt = """You are given a conversation. 
-            Does the tutor offer correct and relevant guidance?
-            Return:
-            {
-            "Providing_Guidance": "Yes/To some extent/No"
-            }"""
+            elif metric == 'revealing_of_the_answer':
+                self.metrics = {'Revealing_of_the_Answer': []}
+                self.system_prompt = """You are given a conversation. 
+                Does the tutor reveal the final answer?
+                Return:
+                {
+                "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No"
+                }"""
 
-        elif metric == 'tutor_tone':
-            self.metrics = {'Tutor_Tone': []}
-            self.system_prompt = """You are given a conversation. 
-            What is the tone of the tutor’s response?
-            Return:
-            {
-            "Tutor_Tone": "Encouraging/Neutral/Offensive"
-            }"""
+            elif metric == 'providing_guidance':
+                self.metrics = {'Providing_Guidance': []}
+                self.system_prompt = """You are given a conversation. 
+                Does the tutor offer correct and relevant guidance?
+                Return:
+                {
+                "Providing_Guidance": "Yes/To some extent/No"
+                }"""
 
-        elif metric == 'all':
-            self.metrics = {
-                "correctness": 0.0,
-                "helpfulness": 0.0,
-                "Mistake_Identification": [],
-                "Revealing_of_the_Answer": [],
-                "Providing_Guidance": [],
-                "Tutor_Tone": []
-            }
-            self.system_prompt = """You are given a conversation. Evaluate the tutor's response:
-            {
-            "reasoning": <explanation>,
-            "correctness": 0-100,
-            "helpfulness": 0-100,
-            "Mistake_Identification": "Yes/To some extent/No",
-            "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No",
-            "Providing_Guidance": "Yes/To some extent/No",
-            "Tutor_Tone": "Encouraging/Neutral/Offensive"
-            }"""
+            elif metric == 'tutor_tone':
+                self.metrics = {'Tutor_Tone': []}
+                self.system_prompt = """You are given a conversation. 
+                What is the tone of the tutor’s response?
+                Return:
+                {
+                "Tutor_Tone": "Encouraging/Neutral/Offensive"
+                }"""
+
+            elif metric == 'all':
+                self.metrics = {
+                    "correctness": 0.0,
+                    "helpfulness": 0.0,
+                    "Mistake_Identification": [],
+                    "Revealing_of_the_Answer": [],
+                    "Providing_Guidance": [],
+                    "Tutor_Tone": []
+                }
+                self.system_prompt = """You are given a conversation. Evaluate the tutor's response:
+                Return:
+                {
+                "reasoning": <explanation>,
+                "correctness": 0-100,
+                "helpfulness": 0-100,
+                "Mistake_Identification": "Yes/To some extent/No",
+                "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No",
+                "Providing_Guidance": "Yes/To some extent/No",
+                "Tutor_Tone": "Encouraging/Neutral/Offensive"
+                }"""
+
+        if eval_student:
+            if metric == 'correct_answer':
+                self.metrics = {'Correct_Answer': ""}
+                self.system_prompt = """You are given a conversation between a student and a tutor.  
+                Provide the correct answer to the question discussed in the conversation.  
+                Return:
+                {
+                "Correct_Answer": "<correct answer text>"
+                }"""
+
+            elif metric == 'concept_usage':
+                self.metrics = {'Concept_Usage': "", 'Key_Concepts_Used': [], 'Key_Concepts_Missed': []}
+                self.system_prompt = """You are given a conversation between a student and a tutor.
+                Judge whether the student used the most relevant concepts, terms, formulas, or steps for solving the problem.
+                Return:
+                {
+                "Concept_Usage": "Yes/Partially/No",
+                "Key_Concepts_Used": ["<list key concepts used>"],
+                "Key_Concepts_Missed": ["<list key concepts that should have been used>"]
+                }"""
+
+            elif metric == 'conciseness':
+                self.metrics = {'Conciseness': 0.0, 'Extraneous_Notes': ""}
+                self.system_prompt = """You are given a conversation between a student and a tutor.
+                Rate how concise the student's final answer/explanation is (higher = more concise, minimal redundancy while retaining substance).
+                Return:
+                {
+                "Conciseness": 0-100,
+                "Extraneous_Notes": "<briefly note any redundancy or off-topic content>"
+                }"""
+
+            elif metric == 'completeness':
+                self.metrics = {'Completeness': "", 'Missing_Elements': []}
+                self.system_prompt = """You are given a conversation between a student and a tutor.
+                Evaluate whether the student's answer covers all required parts (sub-questions, units, proofs, steps).
+                Return:
+                {
+                "Completeness": "Complete/Partially complete/Incomplete",
+                "Missing_Elements": ["<list what is missing or underdeveloped>"]
+                }"""
+
+
+            elif metric == 'all':
+                self.metrics = {
+                    'Correct_Answer': "",
+                    'Concept_Usage': "",
+                    'Key_Concepts_Used': [],
+                    'Key_Concepts_Missed': [],
+                    'Conciseness': 0.0,
+                    'Extraneous_Notes': "",
+                    'Completeness': "",
+                    'Missing_Elements': []
+                }
+                self.system_prompt = """You are given a conversation between a student and a tutor.
+                First, provide the correct answer to the question.
+                Then, evaluate the student's response on concept usage, conciseness, and completeness.
+                Return:
+                {
+                "Correct_Answer": "<correct answer text>",
+                "Concept_Usage": "Yes/Partially/No",
+                "Key_Concepts_Used": ["<key concepts used>"],
+                "Key_Concepts_Missed": ["<key concepts missed>"],
+                "Conciseness": 0-100,
+                "Extraneous_Notes": "<redundancy or off-topic notes>",
+                "Completeness": "Complete/Partially complete/Incomplete",
+                "Missing_Elements": ["<what's missing>"]
+                }"""
 
         else:
             raise ValueError(f"Invalid metric: {metric}")
 
     def evaluate_conversation(self, contexts: List[Dict[str, Any]]) -> str:
-        query = "" 
-        for turn in contexts:
-            query += f"{turn['role'].replace('user', 'student').replace('assistant', 'tutor')}: {turn['content']}\n" 
-        print(query)
-        response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}, {"role": "user", "content": query}])
+        response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}] + contexts)
         try:
             return self.parse_response(response)
         except Exception as e:
-            return {metric: 0.0 for metric in self.metrics}
-    
-    def evaluate(self, dialouges: List[Dict[str, Any]]) -> str:
-        results = {metric: [] for metric in self.metrics}
-        pbar = tqdm(dialouges)
-        for i, dialouge in enumerate(pbar):
-            response = self.evaluate_conversation(dialouge)
-            pbar_text = ""
-            for metric in self.metrics:
-                results[metric].append(response[metric])
-                average = sum(results[metric])/len(results[metric])
-                pbar_text += f"{metric}: {average:.2f} "
-            pbar.set_description(pbar_text)
-        return results
+            return {k: 0.0 if isinstance(v, float) else "No" for k, v in self.metrics.items()}
+
+    def evaluate(self, dialogues: List[Dict[str, Any]]) -> str:
+        pbar = tqdm(dialogues)
+        for i, dialogue in enumerate(pbar):
+            response = self.evaluate_conversation(dialogue)
+            if self.metric == 'correctness_helpfulness' or self.metric == 'all':
+                for k in ['correctness', 'helpfulness']:
+                    self.metrics[k] += response[k] / len(dialogues)
+            for k in self.metrics:
+                if isinstance(self.metrics[k], list):
+                    self.metrics[k].append(response[k])
+        return self.metrics
+
     
     def parse_response(self, response: str) -> Dict[str, Any]:
         response = response.replace("```json", "").replace("```", "").strip()
@@ -211,7 +258,7 @@ class UnslothLLM:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         print('checkpoint loaded')
 
-    def get_llm_response(self, contexts: List[Dict[str, Any]], stream: bool = False) -> str:
+    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
         text = self.tokenizer.apply_chat_template(
             contexts,
             tokenize=False,
@@ -219,29 +266,21 @@ class UnslothLLM:
             enable_thinking=False # Switches between thinking and non-thinking modes. Default is True.
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
-        if stream:
-            streamer = TextStreamer(self.tokenizer, skip_prompt=True)
-            generated_ids = self.model.generate(
-            **model_inputs,
-            max_new_tokens=1024,
-            streamer=streamer
-        )
-        else:
-            generated_ids = self.model.generate(
-            **model_inputs,
-            max_new_tokens=1024)
 
         # conduct text completion
-        
+        generated_ids = self.model.generate(
+            **model_inputs,
+            max_new_tokens=1024
+        )
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
 
-        for char in self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n"):
-            yield char
-            time.sleep(0.01)
-
-    def finetune(self, conversations: List[Dict[str, Any]]):
+        return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
+    
+    def fine_tune(self, dataset: List[Dict[str, Any]]):
+        conversations = dataset.get_dialouge()
         conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
         conversations = Dataset.from_list(conversations)
+        print(conversations)
         model = FastLanguageModel.get_peft_model(
             self.model,
             r = 32,           # Choose any number > 0! Suggested 8, 16, 32, 64, 128
@@ -279,18 +318,6 @@ class UnslothLLM:
         )
         trainer_stats = trainer.train()
         return trainer_stats
-
-# class DummyLM:
-#     def __init__(self, model_name: str):
-#         self.model_name = model_name
-#     def get_llm_response(self, contexts: List[Dict[str, Any]], stream: bool = False) -> str:
-#         if stream:
-#             sentence = "Hi, I am here"
-#             for char in sentence:
-#                 time.sleep(0.1)
-#                 yield char
-#         else:
-#             return "Hi, I am here"
 
 class APILLM:
 
@@ -348,7 +375,6 @@ class LLMGenerator:
         language: str = "English",
         student_level: str = "Middle School",
         max_turns: int = 20,
-        stream: bool = False,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
         """Generate a conversation between a student and a math tutor"""
@@ -387,30 +413,28 @@ class LLMGenerator:
         for turn_id in range(max_turns):
             if log:
                 print("Turn ID: ", turn_id)
-
-            conversation.append({"role": "Student", "content": ""})
-            response = ""
-            for chunk in self.student_model.get_llm_response(student_messages, stream = stream):
-                response += chunk
-                conversation[-1]["content"] += chunk
-                yield conversation.copy()
-            
-            
+            response = self.student_model.get_llm_response(student_messages)
+            conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
 
-            conversation.append({"role": "Tutor", "content": ""})
-            response = ""
-            for chunk in self.tutor_model.get_llm_response(tutor_messages, stream = stream):
-                response += chunk
-                conversation[-1]["content"] += chunk
-                yield conversation.copy()
+            if log:
+                print("Student: ", conversation[-1]["content"])
 
+            response = self.tutor_model.get_llm_response(tutor_messages)
+            conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
+
+            if log:
+                print("Tutor: ", conversation[-1]["content"])
+
             if "<END>" in response:
+                print("--------------------------------")
                 break
-            turn_id += 1
+                
+        return conversation[-2]["content"], conversation
+
         
     def predict_standard(self, examples: List[Dict[str, Any]], question: str = None):
         """Make a few-shot prediction based on examples"""
