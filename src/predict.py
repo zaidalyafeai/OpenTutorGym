@@ -13,6 +13,8 @@ import multiprocessing
 import os
 import json
 from tqdm import tqdm
+import asyncio
+import concurrent
 
 _original_cpu_count = multiprocessing.cpu_count
 multiprocessing.cpu_count = lambda: 1
@@ -45,8 +47,8 @@ HF_LLMS = ["google/gemma-3-4B-it", "Qwen/Qwen3-4B"]
 
 
 class Evaluator:
-    def __init__(self, model: str = "openai/gpt-4o-mini", 
-    metric = 'correctness_helpfulness',
+    def __init__(self, model: str = "google/gemma-3-27b-it", 
+    metric = 'mistake_identification',
     eval_teacher: bool = False,
     eval_student: bool = False,
     eval_answer: bool = False):
@@ -200,13 +202,49 @@ class Evaluator:
         except Exception as e:
             return {k: 0.0 if isinstance(v, float) else "No" for k, v in self.metrics.items()}
 
-    def evaluate(self, dialogues: List[Dict[str, Any]]) -> str:
-        pbar = tqdm(dialogues)
-        for i, dialogue in enumerate(pbar):
-            response = self.evaluate_conversation(dialogue)
-            for k in self.metrics:
-                if isinstance(self.metrics[k], list):
-                    self.metrics[k].append(response[k])
+    def evaluate(self, conversations: List[List[Dict[str, Any]]]) -> Dict[str, Any]:
+        """
+        Evaluate multiple conversations in parallel and return aggregated metrics.
+        
+        Args:
+            conversations: A list of conversation lists, where each conversation is a list of message dicts
+                          with 'role' and 'content' keys.
+                          
+        Returns:
+            Dict containing aggregated metrics for all conversations.
+        """
+        if not conversations:
+            return {k: [] if isinstance(v, list) else v for k, v in self.metrics.items()}
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Create futures with their original indices
+            future_to_index = {executor.submit(self.evaluate_conversation, conversations[i]): i for i in range(len(conversations))}
+            
+            # Initialize results list with None values
+            results = [None] * len(conversations)
+            
+            pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(conversations), desc="Evaluating conversations")
+            
+            for future in pbar:
+                try:
+                    response = future.result()
+                    original_index = future_to_index[future]
+                    results[original_index] = response
+                            
+                except Exception as e:
+                    print(f"Error evaluating conversation: {str(e)}")
+                    # Add default values for failed evaluations
+                    original_index = future_to_index[future]
+                    failed_metrics = {k: 0.0 if isinstance(v, float) else "" for k, v in self.metrics.items()}
+                    results[original_index] = failed_metrics
+            
+            # Update metrics in original order
+            for response in results:
+                if response:
+                    for metric_name, metric_value in response.items():
+                        if isinstance(self.metrics.get(metric_name), list):
+                            self.metrics[metric_name].append(metric_value)
+                    
         return self.metrics
 
     
@@ -358,8 +396,8 @@ class APILLM:
 class LLMGenerator:
     """Class to handle LLM conversations and predictions"""
     
-    def __init__(self, student_model, tutor_model):
-        self.mode = 'tutor'
+    def __init__(self, student_model, tutor_model = None, mode: str = 'tutor'):
+        self.mode = mode
         self.student_model = student_model
         self.tutor_model = tutor_model
 
@@ -429,25 +467,30 @@ class LLMGenerator:
                 
         return conversation[-2]["content"], conversation
 
-        
-    def predict_standard(self, examples: List[Dict[str, Any]], question: str = None):
+
+    def parse_response(self, response: str) -> Dict[str, Any]:
+        reasoning = response.split("### reasoning")[1].split("### solution")[0].strip()
+        solution = response.split("### solution")[1].strip()
+        return {"reasoning": reasoning, "solution": solution}
+    
+    def predict_standard(self, example: Dict[str, Any]):
         """Make a few-shot prediction based on examples"""
-
         system_prompt = """You are given a question. you need to answer the question step by step. Provide the answer in the following format:
-        Reasoning: step by step reasoning to solve the problem
-        Solution: final solution without any units or other text
+        ### reasoning
+        reasoning for the answer
+        ### solution
+        final solution without any units or other text
         """
-        if len(examples) >0:
-            system_prompt += "Here are some examples:\n"
-
-
-        contexts = [{"role": "system", "content": system_prompt}]
-        for example in examples:
-            contexts.append({"role": "user", "content": example["question"]})
-            contexts.append({"role": "assistant", "content": "Solution: " + example["answer"]})
-        
-        contexts.append({"role": "user", "content": f"Question: {question}"})
-        return self.get_llm_response(self.student_model, contexts)
+        contexts = [{"role": "system", "content": system_prompt}, {"role": "user", "content": f"Question: {example['question']}"}]
+        response = self.student_model.get_llm_response(contexts)
+        try:
+            parsed_response = self.parse_response(response)
+        except Exception as e:
+            print(f"Error parsing response: {str(e)}")
+            print(response)
+            parsed_response = {"reasoning": "", "solution": ""}
+        parsed_response["id"] = example["id"]
+        return parsed_response
     
     def process_conversation_examples(self, examples: List[Dict[str, Any]]):
         prompt = """You are a student. You are given a conversation between a student and a tutor that solves a question. 
@@ -471,13 +514,29 @@ class LLMGenerator:
         contexts.append({"role": "user", "content": "Question: " + question})
         return self.get_llm_response(self.student_model, contexts)
     
-    def predict(self, examples: List[Dict[str, Any]], question: str = None, answer: str = None):
+    def predict(self, examples: List[Dict[str, Any]]):
         if "tutor" in self.mode:
-            if len(examples) > 0:
-                return self.predict_conversation_examples(examples, question)
-            else:
-                return self.predict_conversation(question, answer)
-        elif "cot" in self.mode or "fewshot" in self.mode:
-            return self.predict_standard(examples, question)
+            return self.predict_conversation(example)
+        elif "standard" in self.mode:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                # Create futures with their original indices
+                future_to_index = {executor.submit(self.predict_standard, examples[i]): i for i in range(len(examples))}
+                
+                # Initialize results list with None values
+                results = [None] * len(examples)
+                
+                pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(examples), desc="Evaluating conversations")
+                
+                for future in pbar:
+                    try:
+                        response = future.result()
+                        original_index = future_to_index[future]
+                        results[original_index] = response
+                    except Exception as e:
+                        print(f"Error processing example: {str(e)}")
+                        original_index = future_to_index[future]
+                        results[original_index] = {"reasoning": "", "solution": "", "id": examples[original_index].get("id", "")}
+                        
+                return results
         else:
             raise ValueError("Invalid mode")
