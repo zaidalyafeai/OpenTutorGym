@@ -64,7 +64,7 @@ class GSM8K(Dataset):
         self.split = split
         self.subset = "main"
         self.hf_name = "openai/gsm8k"
-        self.dataset = datasets.load_dataset(self.hf_name, self.subset, streaming = True)[self.split]
+        self.dataset = datasets.load_dataset(self.hf_name, self.subset)[self.split]
 
     
     def process_dataset(self):
