@@ -5,7 +5,7 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from typing import Literal
-from unsloth import FastLanguageModel, FastModel
+from peft import get_peft_model
 from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -38,35 +38,25 @@ GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
 DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
 GEMINI_LLMS = ["google/gemini-flash-1.5"]
 GEMMA_LLMS = ["google/gemma-3-27b-it"]
-VLLM_LLMS = ["Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
+VLLM_LLMS = ["google/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
 API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS + GEMMA_LLMS
 
-UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B", "unsloth/Qwen3-30B-A3B-GGUF", "unsloth/Qwen3-14B"]
+HF_LLMS = ["google/gemma-3-4B-it", "Qwen/Qwen3-4B"]
 
 
 class Evaluator:
     def __init__(self, model: str = "openai/gpt-4o-mini", 
     metric = 'correctness_helpfulness',
-    eval_teacher: bool = True,
-    eval_student: bool = False):
+    eval_teacher: bool = False,
+    eval_student: bool = False,
+    eval_answer: bool = False):
 
 
         self.model = APILLM(model)
         self.metric = metric
 
         if eval_teacher:
-            if metric == 'correctness_helpfulness':
-                self.metrics = {'correctness': 0.0, 'helpfulness': 0.0}
-                self.system_prompt = """You are given a conversation between a student and a tutor that solves a question. 
-                You need to judge the correctness and helpfulness of the tutor's response.
-                Return:
-                {
-                "reasoning": <reasoning>,
-                "correctness": 0-100 score for the correctness of the tutor's response,
-                "helpfulness": 0-100 score for the helpfulness of the tutor's response
-                }"""
-
-            elif metric == 'mistake_identification':
+            if metric == 'mistake_identification':
                 self.metrics = {'Mistake_Identification': []}
                 self.system_prompt = """You are given a conversation. 
                 Has the tutor identified a mistake in the student’s response?
@@ -123,7 +113,7 @@ class Evaluator:
                 "Tutor_Tone": "Encouraging/Neutral/Offensive"
                 }"""
 
-        if eval_student:
+        elif eval_student:
             if metric == 'correct_answer':
                 self.metrics = {'Correct_Answer': ""}
                 self.system_prompt = """You are given a conversation between a student and a tutor.  
@@ -191,9 +181,18 @@ class Evaluator:
                 "Missing_Elements": ["<what's missing>"]
                 }"""
 
+        elif eval_answer:
+            if metric == 'correct_answer':
+                self.metrics = {'Correct_Answer': []}
+                self.system_prompt = """You are given a conversation conversation, you need to judge 
+                if the provided answer matches the gold answer.
+                Return:
+                {
+                "Correct_Answer": "Yes/No"
+                }"""
         else:
             raise ValueError(f"Invalid metric: {metric}")
-
+    
     def evaluate_conversation(self, contexts: List[Dict[str, Any]]) -> str:
         response = self.model.get_llm_response([{"role": "system", "content": self.system_prompt}] + contexts)
         try:
@@ -205,9 +204,6 @@ class Evaluator:
         pbar = tqdm(dialogues)
         for i, dialogue in enumerate(pbar):
             response = self.evaluate_conversation(dialogue)
-            if self.metric == 'correctness_helpfulness' or self.metric == 'all':
-                for k in ['correctness', 'helpfulness']:
-                    self.metrics[k] += response[k] / len(dialogues)
             for k in self.metrics:
                 if isinstance(self.metrics[k], list):
                     self.metrics[k].append(response[k])
@@ -244,11 +240,11 @@ def get_ollama_models():
 
     return models
 
-class UnslothLLM:
-    def __init__(self, model_name: str = "unsloth/gemma-3-4B-it"):
+class LLM:
+    def __init__(self, model_name: str = "google/gemma-3-4B-it"):
         self.model_name = model_name
         print('loading checkpoint for ', self.model_name)
-        self.model, _ = FastModel.from_pretrained(
+        self.model = AutoModel.from_pretrained(
             model_name = self.model_name,
             max_seq_length = 2048, # Choose any for long context!
             load_in_4bit = True,  # 4 bit quantization to reduce memory
@@ -281,7 +277,7 @@ class UnslothLLM:
         conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
         conversations = Dataset.from_list(conversations)
         print(conversations)
-        model = FastLanguageModel.get_peft_model(
+        model = peft.get_peft_model(
             self.model,
             r = 32,           # Choose any number > 0! Suggested 8, 16, 32, 64, 128
             target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
@@ -289,8 +285,6 @@ class UnslothLLM:
             lora_alpha = 32,  # Best to choose alpha = rank or rank*2
             lora_dropout = 0, # Supports any, but = 0 is optimized
             bias = "none",    # Supports any, but = "none" is optimized
-            # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-            use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
             random_state = 3407,
             use_rslora = False,   # We support rank stabilized LoRA
             loftq_config = None,  # And LoftQ

@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Generator
 import os
 import dotenv
 from openai import OpenAI
-from src.predict import LLMGenerator, UnslothLLM
+from src.predict import LLMGenerator, LLM
 dotenv.load_dotenv()
 
 GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
@@ -140,9 +140,9 @@ def agent_conversation(
 
 def create_app():
     # Get available models when app starts
-    available_models = ["unsloth/Qwen3-4B", "unsloth/Qwen3-14B"]
-    default_student_model = "unsloth/Qwen3-4B"
-    default_tutor_model = "unsloth/Qwen3-4B"
+    available_models = ["Qwen/Qwen3-4B", "Qwen/Qwen3-14B"]
+    default_student_model = "Qwen/Qwen3-4B"
+    default_tutor_model = "Qwen/Qwen3-4B"
     
     # Define math problems with their solutions
     math_problems = [
@@ -218,8 +218,8 @@ def create_app():
         student_model_name.change(update_visibility, student_model_name, [human_text, start_btn])
         
         # wait for models to load
-        student_model = UnslothLLM(student_model_name.value)
-        tutor_model = UnslothLLM(tutor_model_name.value)
+        student_model = LLM(student_model_name.value)
+        tutor_model = LLM(tutor_model_name.value)
         # start_btn.click(enable)
 
         def start_conversation(problem_with_solution, language, human_text, human_conversation, tutor_conversation):
