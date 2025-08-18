@@ -12,8 +12,7 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    judge = Evaluator(args.judge_model, metric='instruction_following')
-
+    judge = Evaluator(args.judge_model, metric='mistake_identification', eval_teacher=True, eval_student=False)
     dataset = StepVerify()
     dialouges = dataset.get_dialouge()[:10]
     sample_conversation = [
@@ -38,10 +37,22 @@ def main():
         ]
     ]
     results = judge.evaluate(sample_conversation)
-    print(results)
-    judge = Evaluator(args.judge_model, metric='revealing_answer')
-    results = judge.evaluate(sample_conversation)   
+    judge = Evaluator(args.judge_model, metric='revealing_of_the_answer', eval_teacher=True, eval_student=False)
+    results = judge.evaluate(sample_conversation) 
 
+    sample_conversation = [
+        [
+            {"role": "assistant", "content": "The answer is 3*3"},
+            {"role": "user", "content": "Gold: 9"}
+        ],
+
+        [
+            {"role": "assistant", "content": "The answer is 2*3 + 1"},
+            {"role": "user", "content": "Gold: 9"},
+        ]
+    ]  
+    judge = Evaluator(args.judge_model, metric='correct_answer', eval_answer=True)
+    results = judge.evaluate(sample_conversation)   
     print(results)
 if __name__ == "__main__":
 
