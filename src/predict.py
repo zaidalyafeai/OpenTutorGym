@@ -8,7 +8,7 @@ from typing import Literal
 from peft import get_peft_model
 from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModel
 import multiprocessing
 import os
 import json
@@ -283,7 +283,7 @@ class LLM:
         self.model_name = model_name
         print('loading checkpoint for ', self.model_name)
         self.model = AutoModel.from_pretrained(
-            model_name = self.model_name,
+            self.model_name,
             max_seq_length = 2048, # Choose any for long context!
             load_in_4bit = True,  # 4 bit quantization to reduce memory
             load_in_8bit = False, # [NEW!] A bit more accurate, uses 2x memory
