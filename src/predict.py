@@ -96,8 +96,6 @@ class Evaluator:
 
             elif metric == 'all':
                 self.metrics = {
-                    "correctness": 0.0,
-                    "helpfulness": 0.0,
                     "Mistake_Identification": [],
                     "Revealing_of_the_Answer": [],
                     "Providing_Guidance": [],
@@ -107,8 +105,6 @@ class Evaluator:
                 Return:
                 {
                 "reasoning": <explanation>,
-                "correctness": 0-100,
-                "helpfulness": 0-100,
                 "Mistake_Identification": "Yes/To some extent/No",
                 "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No",
                 "Providing_Guidance": "Yes/To some extent/No",
