@@ -1,6 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from tqdm import tqdm
-from predict import LLMGenerator, LLM
-from Datasets import GSM8K, StepVerify
+from src.predict import LLMGenerator, LLM
+from src.Datasets import GSM8K, StepVerify
 from argparse import ArgumentParser
 
 def parse_args():

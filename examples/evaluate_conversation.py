@@ -1,6 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from tqdm import tqdm
-from predict import Evaluator
-from Datasets import StepVerify
+from src.predict import Evaluator
+from src.Datasets import StepVerify
 from argparse import ArgumentParser
 
 def parse_args():
