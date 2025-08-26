@@ -15,12 +15,8 @@ import json
 from tqdm import tqdm
 import asyncio
 import concurrent
+from rich import print
 
-_original_cpu_count = multiprocessing.cpu_count
-multiprocessing.cpu_count = lambda: 1
-
-if hasattr(os, 'cpu_count'):
-    os.cpu_count = lambda: 4
 dotenv.load_dotenv()
 
 class JudgeResponse(BaseModel):
@@ -35,26 +31,16 @@ class ExtractedAnswer(BaseModel):
     confidence: int
     strict: Literal[True] # 100% reliability
 
-# Model type constants
-GPT_LLMS = ["openai/gpt-4o-mini", "openai/gpt-4o"]
-DEEPSEEK_LLMS = ["deepseek/deepseek-chat"]
-GEMINI_LLMS = ["google/gemini-flash-1.5"]
-GEMMA_LLMS = ["google/gemma-3-27b-it"]
-VLLM_LLMS = ["google/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"]
-API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS + GEMMA_LLMS
-
-HF_LLMS = ["google/gemma-3-4B-it", "Qwen/Qwen3-4B"]
-
 
 class Evaluator:
-    def __init__(self, model: str = "google/gemma-3-27b-it", 
+    def __init__(self, model,  
     metric = 'mistake_identification',
     eval_teacher: bool = False,
     eval_student: bool = False,
     eval_answer: bool = False):
 
 
-        self.model = APILLM(model)
+        self.model = model
         self.metric = metric
 
         if eval_teacher:
@@ -219,7 +205,7 @@ class Evaluator:
             # Initialize results list with None values
             results = [None] * len(conversations)
             
-            pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(conversations), desc="Evaluating conversations")
+            pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(conversations), desc="Evaluating")
             
             for future in pbar:
                 try:
@@ -274,7 +260,7 @@ def get_ollama_models():
 
     return models
 
-class LLM:
+class TLLM:
     def __init__(self, model_name: str = "google/gemma-3-4B-it"):
         self.model_name = model_name
         print('loading checkpoint for ', self.model_name)
@@ -349,22 +335,26 @@ class LLM:
 
 class APILLM:
 
-    def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8000"):
+    def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8787", backend: str = "openrouter"):
         self.model = model
         self.port = port
+        self.backend = backend
+        print("Model: ", self.model)
+        print("Backend: ", self.backend)
+        print("==================================")
 
     def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
         """Get response from LLM based on model type"""
         api_key = ""
         api_base = ""
-        if self.model in API_LLMS:
+        if self.backend == "openrouter":
             api_key = os.environ.get("OPENROUTER_API_KEY")
             api_base = "https://openrouter.ai/api/v1"
-        elif self.model in VLLM_LLMS:
-            api_key = "EMPTY"
-            api_base = f"http://localhost:{self.port}/v1"
-        elif self.model in get_ollama_models():
+        elif self.backend == "ollama":
             api_key = "ollama"
+            api_base = f"http://localhost:{self.port}/v1"
+        elif self.backend == "vllm":
+            api_key = "EMPTY"
             api_base = f"http://localhost:{self.port}/v1"
         else:
             raise ValueError(f"Invalid model: {self.model}")
@@ -388,6 +378,20 @@ class APILLM:
             print(response)
             # raise  # Re-raise the exception after logging
 
+
+class LLM:
+    def __init__(self, model_name: str = "google/gemma-3-4B-it", backend: str = "openrouter", **kwargs):
+        self.backend = backend
+        self.model_name = model_name
+        if self.backend in ["openrouter", "ollama", "vllm"]:
+            self.model = APILLM(model_name, backend=backend, **kwargs)
+        elif self.backend == "transformers":
+            self.model = TLLM(model_name)
+        else:
+            raise ValueError(f"Invalid backend: {self.backend}")
+    
+    def get_llm_response(self, contexts: List[Dict[str, Any]]):
+        return self.model.get_llm_response(contexts)
 
 class LLMGenerator:
     """Class to handle LLM conversations and predictions"""
@@ -521,7 +525,7 @@ class LLMGenerator:
                 # Initialize results list with None values
                 results = [None] * len(examples)
                 
-                pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(examples), desc="Evaluating conversations")
+                pbar = tqdm(concurrent.futures.as_completed(future_to_index), total=len(examples), desc="Predicting")
                 
                 for future in pbar:
                     try:
