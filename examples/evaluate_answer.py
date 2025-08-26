@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
-from src.predict import Evaluator, APILLM, LLMGenerator 
+from src.predict import Evaluator, LLM, LLMGenerator 
 from src.Datasets import StepVerify, GSM8K
 from argparse import ArgumentParser
 
@@ -18,13 +18,11 @@ def main():
     
     dataset = GSM8K()
     dataset = dataset.process_dataset()
-    student_model = APILLM("google/gemma-3-27b-it")
+    student_model = LLM("google/gemma-3-27b-it", backend="openrouter")
     generator = LLMGenerator(student_model=student_model, mode= "standard")
     examples = [dataset[i] for i in range(10)]
     answers = generator.predict(examples)
-    # print(examples)
-    # print(answers)
-    judge = Evaluator("openai/gpt-4o", metric='correct_answer', eval_answer=True)
+    judge = Evaluator("openai/gpt-4o", backend="openrouter", metric='correct_answer', eval_answer=True)
     
     # create conversations
     conversations = []
