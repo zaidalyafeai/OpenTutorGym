@@ -43,28 +43,28 @@ API_LLMS = GPT_LLMS + DEEPSEEK_LLMS + GEMINI_LLMS + GEMMA_LLMS
 
 UNSLOTH_LLMS = ["unsloth/gemma-3-4B-it", "unsloth/Qwen3-4B", "unsloth/Qwen3-30B-A3B-GGUF", "unsloth/Qwen3-14B"]
 
+desired_labels = {
+    'Mistake_Identification': "Yes",
+    'Revealing_of_the_Answer': "No",
+    'Providing_Guidance': "Yes",
+    'Tutor_Tone': "Encouraging",
+    'Concept_Usage': "Yes",
+    'Completeness': "Complete",
+    'Correct_Answer': "Yes"
+}
 
 class Evaluator:
     def __init__(self, model: str = "openai/gpt-4o-mini", 
-    metric = 'correctness_helpfulness',
+    metric = 'mistake_identification',
     eval_teacher: bool = True,
-    eval_student: bool = False):
+    eval_student: bool = False,
+    eval_answer: bool = False):
 
 
         self.model = APILLM(model)
         self.metric = metric
 
         if eval_teacher:
-            if metric == 'correctness_helpfulness':
-                self.metrics = {'correctness': 0.0, 'helpfulness': 0.0}
-                self.system_prompt = """You are given a conversation between a student and a tutor that solves a question. 
-                You need to judge the correctness and helpfulness of the tutor's response.
-                Return:
-                {
-                "reasoning": <reasoning>,
-                "correctness": 0-100 score for the correctness of the tutor's response,
-                "helpfulness": 0-100 score for the helpfulness of the tutor's response
-                }"""
 
             elif metric == 'mistake_identification':
                 self.metrics = {'Mistake_Identification': []}
@@ -72,7 +72,7 @@ class Evaluator:
                 Has the tutor identified a mistake in the student’s response?
                 Return:
                 {
-                "Mistake_Identification": "Yes/To some extent/No"
+                "Mistake_Identification": ["Yes/To some extent/No"]
                 }"""
 
             elif metric == 'revealing_of_the_answer':
@@ -81,7 +81,7 @@ class Evaluator:
                 Does the tutor reveal the final answer?
                 Return:
                 {
-                "Revealing_of_the_Answer": "Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No"
+                "Revealing_of_the_Answer": ["Yes (and the revealed answer is correct)/Yes (but the revealed answer is incorrect)/No"]
                 }"""
 
             elif metric == 'providing_guidance':
@@ -90,7 +90,7 @@ class Evaluator:
                 Does the tutor offer correct and relevant guidance?
                 Return:
                 {
-                "Providing_Guidance": "Yes/To some extent/No"
+                "Providing_Guidance": ["Yes/To some extent/No"]
                 }"""
 
             elif metric == 'tutor_tone':
@@ -99,13 +99,11 @@ class Evaluator:
                 What is the tone of the tutor’s response?
                 Return:
                 {
-                "Tutor_Tone": "Encouraging/Neutral/Offensive"
+                "Tutor_Tone": ["Encouraging/Neutral/Offensive"]
                 }"""
 
             elif metric == 'all':
                 self.metrics = {
-                    "correctness": 0.0,
-                    "helpfulness": 0.0,
                     "Mistake_Identification": [],
                     "Revealing_of_the_Answer": [],
                     "Providing_Guidance": [],
@@ -125,16 +123,16 @@ class Evaluator:
 
         if eval_student:
             if metric == 'correct_answer':
-                self.metrics = {'Correct_Answer': ""}
+                self.metrics = {'Correct_Answer': []}
                 self.system_prompt = """You are given a conversation between a student and a tutor.  
                 Provide the correct answer to the question discussed in the conversation.  
                 Return:
                 {
-                "Correct_Answer": "<correct answer text>"
+                "Correct_Answer": Yes/No
                 }"""
 
             elif metric == 'concept_usage':
-                self.metrics = {'Concept_Usage': "", 'Key_Concepts_Used': [], 'Key_Concepts_Missed': []}
+                self.metrics = {'Concept_Usage': [], 'Key_Concepts_Used': [], 'Key_Concepts_Missed': []}
                 self.system_prompt = """You are given a conversation between a student and a tutor.
                 Judge whether the student used the most relevant concepts, terms, formulas, or steps for solving the problem.
                 Return:
@@ -145,51 +143,62 @@ class Evaluator:
                 }"""
 
             elif metric == 'conciseness':
-                self.metrics = {'Conciseness': 0.0, 'Extraneous_Notes': ""}
+                self.metrics = {'Conciseness': [0.0], 'Extraneous_Notes': []}
                 self.system_prompt = """You are given a conversation between a student and a tutor.
                 Rate how concise the student's final answer/explanation is (higher = more concise, minimal redundancy while retaining substance).
                 Return:
                 {
-                "Conciseness": 0-100,
-                "Extraneous_Notes": "<briefly note any redundancy or off-topic content>"
+                "Conciseness":[0-100],
+                "Extraneous_Notes": ["<briefly note any redundancy or off-topic content>"]
                 }"""
 
             elif metric == 'completeness':
-                self.metrics = {'Completeness': "", 'Missing_Elements': []}
+                self.metrics = {'Completeness': [], 'Missing_Elements': []}
                 self.system_prompt = """You are given a conversation between a student and a tutor.
                 Evaluate whether the student's answer covers all required parts (sub-questions, units, proofs, steps).
                 Return:
                 {
-                "Completeness": "Complete/Partially complete/Incomplete",
+                "Completeness": ["Complete/Partially complete/Incomplete"],
                 "Missing_Elements": ["<list what is missing or underdeveloped>"]
                 }"""
 
 
             elif metric == 'all':
                 self.metrics = {
-                    'Correct_Answer': "",
-                    'Concept_Usage': "",
-                    'Key_Concepts_Used': [],
-                    'Key_Concepts_Missed': [],
-                    'Conciseness': 0.0,
-                    'Extraneous_Notes': "",
-                    'Completeness': "",
-                    'Missing_Elements': []
+                    'Correct_Answer': [],
+                    'Concept_Usage': [],
+                    'Key_Concepts_Used': [""],
+                    'Key_Concepts_Missed': [""],
+                    'Conciseness': [0.0],
+                    'Extraneous_Notes': [""],
+                    'Completeness': [],
+                    'Missing_Elements': [""]
                 }
                 self.system_prompt = """You are given a conversation between a student and a tutor.
                 First, provide the correct answer to the question.
                 Then, evaluate the student's response on concept usage, conciseness, and completeness.
                 Return:
                 {
-                "Correct_Answer": "<correct answer text>",
-                "Concept_Usage": "Yes/Partially/No",
+                "Correct_Answer": ["<correct answer text>"],
+                "Concept_Usage": ["Yes/Partially/No"],
                 "Key_Concepts_Used": ["<key concepts used>"],
                 "Key_Concepts_Missed": ["<key concepts missed>"],
-                "Conciseness": 0-100,
-                "Extraneous_Notes": "<redundancy or off-topic notes>",
-                "Completeness": "Complete/Partially complete/Incomplete",
+                "Conciseness": [0-100],
+                "Extraneous_Notes": ["<redundancy or off-topic notes>"],
+                "Completeness": ["Complete/Partially complete/Incomplete"],
                 "Missing_Elements": ["<what's missing>"]
                 }"""
+        
+        elif eval_answer:
+            if metric == 'correct_answer':
+                self.metrics = {'Correct_Answer': []}
+                self.system_prompt = """You are given a conversation conversation, you need to judge 
+                if the provided answer matches the gold answer.
+                Return:
+                {
+                "Correct_Answer": "Yes/No"
+                }"""
+        else:
 
         else:
             raise ValueError(f"Invalid metric: {metric}")
@@ -203,15 +212,34 @@ class Evaluator:
 
     def evaluate(self, dialogues: List[Dict[str, Any]]) -> str:
         pbar = tqdm(dialogues)
+        total = len(dialogues)
+
         for i, dialogue in enumerate(pbar):
             response = self.evaluate_conversation(dialogue)
-            if self.metric == 'correctness_helpfulness' or self.metric == 'all':
-                for k in ['correctness', 'helpfulness']:
-                    self.metrics[k] += response[k] / len(dialogues)
+            # if self.metric == 'correctness_helpfulness' or self.metric == 'all':
+            #     for k in ['correctness', 'helpfulness']:
+            #         self.metrics[k] += response[k] / len(dialogues)
             for k in self.metrics:
                 if isinstance(self.metrics[k], list):
                     self.metrics[k].append(response[k])
-        return self.metrics
+
+        # Final compact numeric scores
+        final_scores = {}
+        for k, vals in self.metrics.items():
+            if k in desired_labels: 
+                count = sum(1 for v in vals if v == desired_labels[k])
+                final_scores[k] = round((count / total) * 100, 2)
+
+            elif (len(vals) > 0 
+            and any(isinstance(v, (int, float)) for v in vals if v is not None) 
+            and all(isinstance(v, (int, float)) or v is None for v in vals)): 
+                avg = sum(v for v in vals if v is not None) / len(vals)
+                final_scores[k] = round(avg, 2)
+            else:  
+                final_scores[k] = vals
+
+
+        return self.metrics, final_scores
 
     
     def parse_response(self, response: str) -> Dict[str, Any]:
