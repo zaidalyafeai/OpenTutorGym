@@ -4,13 +4,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
 from src.predict import LLMGenerator, LLM
-from src.Datasets import GSM8K, StepVerify
+from src.Datasets import GSM8K
 from argparse import ArgumentParser
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("--student_model", type=str, default="Qwen/Qwen3-4B")
-    parser.add_argument("--tutor_model", type=str, default="Qwen/Qwen3-4B")
+    parser.add_argument("--student_model", type=str, default="Qwen2.5-3B-Instruct")
+    parser.add_argument("--tutor_model", type=str, default="Qwen2.5-3B-Instruct")
     parser.add_argument("--split", type=str, default="train")
     return parser.parse_args()
 
@@ -18,8 +18,8 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    student_model = LLM(args.student_model)
-    tutor_model = LLM(args.tutor_model)
+    student_model = LLM(args.student_model, backend="vllm")
+    tutor_model = LLM(args.tutor_model, backend="vllm")
 
     predictor = LLMGenerator(student_model=student_model, tutor_model=tutor_model)
 
@@ -30,11 +30,10 @@ def main():
         output = []
         for conversation in predictor.predict_conversation(
             problem["question"],
-            stream = False,
             log = True
         ):
             output.append(conversation)
-        print(output[-1])
+        # print(output[-1])
         if i == 10:
             break
 
