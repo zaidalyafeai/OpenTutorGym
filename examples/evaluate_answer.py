@@ -18,11 +18,12 @@ def main():
     
     dataset = GSM8K()
     dataset = dataset.process_dataset()
-    student_model = LLM("google/gemma-3-27b-it", backend="openrouter")
+    student_model = LLM("Qwen2.5-3B-Instruct", backend="vllm")
+    judge_model = LLM("openai/gpt-4o", backend="openrouter")
     generator = LLMGenerator(student_model=student_model, mode= "standard")
     examples = [dataset[i] for i in range(10)]
     answers = generator.predict(examples)
-    judge = Evaluator("openai/gpt-4o", backend="openrouter", metric='correct_answer', eval_answer=True)
+    judge = Evaluator(judge_model, metric='correct_answer', eval_answer=True)
     
     # create conversations
     conversations = []
