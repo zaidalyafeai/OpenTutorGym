@@ -466,6 +466,79 @@ class LLMGenerator:
                 break
                 
         return conversation[-2]["content"], conversation
+    
+    def async_predict_conversation(
+        self,
+        question: str,
+        language: str = "English",
+        student_level: str = "Middle School",
+        max_turns: int = 20,
+        log: bool = False,
+    ) -> List[Dict[str, Any]]:
+        """Generate a conversation between a student and a math tutor"""
+        # System prompts for each agent
+        student_system = f"""You speak in {language}.
+        Never forget you are a Student in {student_level} and I am a Tutor. Never flip roles! You will always ask questions, never instruct me or ask me to solve the problem.
+        I will help you to solve the problem. Here is the problem: {question}. Never forget the problem. You will ask for hints and I will provide you with some guidlines.  
+        Try to understand the hints and guidance provided by me. 
+        Once you have solved the problem, output the solution in the following format:
+        Solution: <solution>
+        Only output the final solution as a number do not include any units or other text.
+        """
+        
+        tutor_system = f"""You speak in {language}.
+        Never forget you are a Tutor and I am a Student in {student_level}. Never flip roles! You will always provide hints, never reveal the solution.
+        You want to help me to answer the question: {question}. Provide hints and guidance rather than complete solutions. The hints and guidance MUST be according to the {student_level}.
+        Ask questions to lead me to discover the answer myself. Only ask one question at a time. Be encouraging and supportive. If I provide the solution in the format:
+        Solution: <solution> 
+        You must verify that the solution is correct. If my solution is correct congratulate me and end the conversation using <END>.
+        """
+
+        # Initialize message history
+        student_messages = [
+            {"role": "system", "content": student_system},
+            {"role": "user", "content": question},
+        ]
+        tutor_messages = [
+            {"role": "system", "content": tutor_system},
+            {"role": "assistant", "content": question},
+        ]
+        conversation = [{"role": "assistant", "content": question}]
+
+        if log:
+            print("Question: ", question)
+
+        for turn_id in range(max_turns):
+            if log:
+                print("Turn ID: ", turn_id)
+            response = ""
+            conversation.append({"role": "Student", "content": response})
+            for chunk in self.student_model.get_llm_response(student_messages):
+                response += chunk
+                conversation[-1]["content"] = response
+                yield conversation.copy()
+            
+            student_messages.append({"role": "assistant", "content": response})
+            tutor_messages.append({"role": "user", "content": response})
+
+            if log:
+                print("Student: ", response)
+            response = ""
+            conversation.append({"role": "Tutor", "content": response})
+            for chunk in self.tutor_model.get_llm_response(tutor_messages):
+                response += chunk
+                conversation[-1]["content"] = response
+                yield conversation.copy()
+            student_messages.append({"role": "user", "content": response})
+            tutor_messages.append({"role": "assistant", "content": response})
+
+            if log:
+                print("Tutor: ", conversation[-1]["content"])
+
+            if "<END>" in response:
+                print("--------------------------------")
+                break
+
 
 
     def parse_response(self, response: str) -> Dict[str, Any]:

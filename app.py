@@ -140,9 +140,9 @@ def agent_conversation(
 
 def create_app():
     # Get available models when app starts
-    available_models = ["Qwen/Qwen3-4B", "Qwen/Qwen3-14B"]
-    default_student_model = "Qwen/Qwen3-4B"
-    default_tutor_model = "Qwen/Qwen3-4B"
+    available_models = ["Qwen2.5-3B-Instruct", "Qwen2.5-7B-Instruct"]
+    default_student_model = "Qwen2.5-7B-Instruct"
+    default_tutor_model = "Qwen2.5-3B-Instruct"
     
     # Define math problems with their solutions
     math_problems = [
@@ -175,10 +175,10 @@ def create_app():
                     value=default_tutor_model,
                     label="Tutor Model"
                 )
-                student_level = gr.Dropdown(
-                    choices=["Kindergarten", "Elementary School", "Middle School", "High School"],
-                    value="Middle School",
-                    label="Student Level"
+                backend = gr.Dropdown(
+                    choices=["vllm", "openrouter"],
+                    value="vllm",
+                    label="Backend"
                 )
             
             with gr.Column():
@@ -215,28 +215,25 @@ def create_app():
         def enable():
             return gr.Button("Start A Tutoring Session", interactive=True)
         
-        student_model_name.change(update_visibility, student_model_name, [human_text, start_btn])
+        # student_model_name.change(update_visibility, student_model_name, [human_text, start_btn])
         
         # wait for models to load
-        student_model = LLM(student_model_name.value)
-        tutor_model = LLM(tutor_model_name.value)
+        student_model = LLM(student_model_name.value, backend=backend.value, port = 8788)
+        tutor_model = LLM(tutor_model_name.value, backend=backend.value, port = 8787)
         # start_btn.click(enable)
 
         def start_conversation(problem_with_solution, language, human_text, human_conversation, tutor_conversation):
             # Parse the problem and solution from the dropdown value
             predictor = LLMGenerator(student_model=student_model, tutor_model=tutor_model)
             question, solution = problem_with_solution.split(" | Solution: ")
-            for messages in predictor.predict_conversation(question, language, student_level, max_turns = 20):
+            for messages in predictor.async_predict_conversation(question, language, max_turns = 10):
                 formatted_messages = []
                 for msg in messages:
                     if msg["role"] == "Student":
                         formatted_messages.append((msg["content"], None))
                     else:  # Tutor
                         formatted_messages.append((None, msg["content"]))
-                if human_text != "":
-                    yield formatted_messages, ""  # Return empty string to clear human_text
-                else:
-                    yield formatted_messages
+                yield formatted_messages
         
         start_btn.click(
             start_conversation,
