@@ -35,15 +35,13 @@ class ExtractedAnswer(BaseModel):
 class Evaluator:
     def __init__(self, model: str = "google/gemma-3-27b-it", 
     metric = 'mistake_identification',
-    eval_teacher: bool = False,
-    eval_student: bool = False,
-    eval_answer: bool = False):
+    eval_mode: Literal['teacher', 'student', 'answer'] = 'teacher'):
 
 
         self.model = model
         self.metric = metric
 
-        if eval_teacher:
+        if eval_mode == 'teacher':
             if metric == 'mistake_identification':
                 self.metrics = {'Mistake_Identification': []}
                 self.system_prompt = """You are given a conversation. 
@@ -97,7 +95,7 @@ class Evaluator:
                 "Tutor_Tone": "Encouraging/Neutral/Offensive"
                 }"""
 
-        elif eval_student:
+        elif eval_mode == 'student':
             if metric == 'correct_answer':
                 self.metrics = {'Correct_Answer': []}
                 self.system_prompt = """You are given a conversation between a student and a tutor.  
@@ -165,7 +163,7 @@ class Evaluator:
                 "Missing_Elements": ["<what's missing>"]
                 }"""
         
-        elif eval_answer:
+        elif eval_mode == 'answer':
             if metric == 'correct_answer':
                 self.metrics = {'Correct_Answer': []}
                 self.system_prompt = """You are given a conversation conversation, you need to judge 
