@@ -5,6 +5,7 @@ import zipfile
 import os
 import hashlib
 import datasets
+from tqdm import tqdm
 
 import re
 from itertools import islice
@@ -308,7 +309,28 @@ class TutorEval(Dataset):
         self.dataset = self.dataset.map(_simplify)
         return self.dataset  
     
-    
+
+class Book2Dial(Dataset):
+
+    def __init__(self, subset = 'train'):
+        self.subset = subset
+        base_path = "https://raw.githubusercontent.com/eth-lre/book2dial/refs/heads/main/generated_dataset"
+        topics = ['business', 'math', 'science', 'social']
+        paths = [f"{base_path}/{topic}_Persona_high_info.jsonl" for topic in topics]
+        self.conversations = []
+        for path in paths:
+            response_text = requests.get(path).text.strip()
+            for line in tqdm(response_text.split('\n')):
+                item = json.loads(line)
+                history = item['history']
+                dialouge = []
+                for i, turn in enumerate(history):
+                    if i % 2 == 0:
+                        dialouge.append({"role": "tutor", "content": turn})
+                    else:
+                        dialouge.append({"role": "student", "content": turn})
+                self.conversations.append(Conversation(dialouge = dialouge))
+
 def load_dataset(dataset_name):
     if dataset_name == 'stepwise_verify':
         return StepVerify()
@@ -328,6 +350,8 @@ def load_dataset(dataset_name):
         return GSM8K()
     elif dataset_name == 'socra_teach':
         return SocraTeach()
+    elif dataset_name == 'book2dial':
+        return Book2Dial()
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
@@ -375,4 +399,7 @@ if __name__ == "__main__":
     print('SocraTeach')
     dataset = load_dataset('socra_teach')
     print(dataset.conversations[0])
-    
+
+    print('Book2Dial')
+    dataset = load_dataset('book2dial')
+    print(dataset.conversations[0])
