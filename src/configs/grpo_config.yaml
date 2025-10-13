@@ -1,0 +1,26 @@
+learning_rate: 5.0e-6
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+num_train_epochs: 1
+warmup_ratio: 0.1
+weight_decay: 0.1
+lr_scheduler_type: cosine
+optim: adamw_torch_fused
+adam_beta1: 0.9
+adam_beta2: 0.99
+
+
+num_generations: 8           # reduce if out of memory
+max_prompt_length: 512
+max_completion_length: 512
+beta: 0.1
+num_train_epochs: 1
+# max_steps = 1000
+
+# use_vllm=True  # Speed up generation
+
+
+logging_steps: 1
+report_to: "none"
+save_steps: 50
+output_dir: "./outputs/grpo"

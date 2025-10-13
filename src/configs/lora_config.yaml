@@ -1,0 +1,20 @@
+# LoRA adapter configuration
+r: 32                      # Rank (low-rank dimension)
+lora_alpha: 32             # Scaling factor, often rank or rank*2
+lora_dropout: 0.0          # Dropout probability (0.0 is fastest/most memory-efficient)
+bias: "none"               # "none", "all", or "lora_only"
+task_type: "CAUSAL_LM"     # Required for causal LM fine-tuning
+
+target_modules:            # Inject LoRA into these layers
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Optional extras
+random_state: 3407
+use_rslora: false          # Rank-stabilized LoRA toggle
+loftq_config: null         # LoftQ (quantization-aware LoRA), keep null if unused
