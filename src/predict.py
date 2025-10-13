@@ -33,7 +33,7 @@ class ExtractedAnswer(BaseModel):
 
 
 class Evaluator:
-    def __init__(self, model,  
+    def __init__(self, model: str = "google/gemma-3-27b-it", 
     metric = 'mistake_identification',
     eval_teacher: bool = False,
     eval_student: bool = False,
