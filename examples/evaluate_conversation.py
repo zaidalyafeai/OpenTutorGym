@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
-from src.predict import Evaluator
+from src.predict import Evaluator, LLM
 from src.Datasets import StepVerify
 from argparse import ArgumentParser
 
@@ -16,7 +16,8 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    judge = Evaluator(args.judge_model, metric='mistake_identification', eval_teacher=True, eval_student=False)
+    judge = LLM(args.judge_model, backend="openrouter")
+    evaluator = Evaluator(judge, metric='mistake_identification', eval_mode='teacher')
     dataset = StepVerify()
     dialouges = dataset.get_dialouge()[:10]
     sample_conversation = [
@@ -40,9 +41,10 @@ def main():
             {"role": "assistant", "content": "Sure, the answer is 9."},
         ]
     ]
-    results = judge.evaluate(sample_conversation)
-    judge = Evaluator(args.judge_model, metric='revealing_of_the_answer', eval_teacher=True, eval_student=False)
-    results = judge.evaluate(sample_conversation) 
+    results = evaluator.evaluate(sample_conversation)
+    print(results)
+    evaluator = Evaluator(judge, metric='revealing_of_the_answer', eval_mode='teacher')
+    results = evaluator.evaluate(sample_conversation) 
 
     sample_conversation = [
         [
@@ -55,8 +57,8 @@ def main():
             {"role": "user", "content": "Gold: 9"},
         ]
     ]  
-    judge = Evaluator(args.judge_model, metric='correct_answer', eval_answer=True)
-    results = judge.evaluate(sample_conversation)   
+    evaluator = Evaluator(judge, metric='correct_answer', eval_mode='answer')
+    results = evaluator.evaluate(sample_conversation)   
     print(results)
 if __name__ == "__main__":
 

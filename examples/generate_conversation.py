@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
-from src.predict import LLMGenerator, LLM
+from src.predict import LLMGenerator, APILLM
 from src.Datasets import GSM8K
 from argparse import ArgumentParser
 
@@ -18,8 +18,8 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    student_model = LLM(args.student_model, backend="vllm")
-    tutor_model = LLM(args.tutor_model, backend="vllm")
+    student_model = APILLM(args.student_model, backend="vllm", port="8787")
+    tutor_model = APILLM(args.tutor_model, backend="vllm", port="8788")
 
     predictor = LLMGenerator(student_model=student_model, tutor_model=tutor_model)
 
