@@ -18,8 +18,8 @@ def main():
 
     ## generate conversation
     args = parse_args()
-    student_model = LLM(args.student_model)
-    tutor_model = LLM(args.tutor_model)
+    student_model = LLM(args.student_model, backend="vllm")
+    tutor_model = LLM(args.tutor_model, backend="vllm")
 
     predictor = LLMGenerator(student_model=student_model, tutor_model=tutor_model)
 
