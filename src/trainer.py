@@ -63,7 +63,7 @@ class PeftModelWrapper:
             peft_config = self._build_peft_config_obj(cfg_dict)
             return get_peft_model(model, peft_config)
 
-        # Fallback: a safe LoRA default
+        # Fallback: a LoRA default
         default_cfg = LoraConfig(
             r=32,
             lora_alpha=32,
@@ -115,12 +115,7 @@ class CustomTrainer:
                 args=trainer_config,
                 **self.kwargs
             )
-
-
-        
-           
-    
-        
+       
 def main():
     base_model = AutoModelForCausalLM.from_pretrained(
         "Qwen/Qwen2.5-0.5B-Instruct",
@@ -137,7 +132,7 @@ def main():
     )
 
     dataset = load_dataset('comta')
-    # conversations = dataset.get_dialogue()
+    conversations = dataset.get_dialogue()
     conversations = [{"text": tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
     conversations = Dataset.from_list(conversations)
     print(conversations)
@@ -145,8 +140,8 @@ def main():
     trainer = CustomTrainer(
         model=model,
         tokenizer=tokenizer,
-        train_dataset=conversations,  # Replace with your training dataset
-        eval_dataset=None,   # Replace with your evaluation dataset
+        train_dataset=conversations,
+        eval_dataset=None, 
         config_path="./configs/sft_config.yaml",
     ).get_trainer()
 
