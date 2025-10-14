@@ -26,34 +26,28 @@ class Problem:
         return f"Problem: {self.text}\n"
 
 class Conversation:
-    def __init__(self, problem:Problem = None, solution = '', topic = '', dialouge = []):
+    def __init__(self, problem:Problem = None, solution = '', topic = '', dialogue = []):
         if problem is None:
             self.problem = Problem()
         else:
             self.problem = problem
         self.solution = solution
         self.topic = topic
-        self.dialouge = [{"role": item['role'], "content": item['content']} for item in dialouge]
+        self.dialogue = [{"role": item['role'], "content": item['content']} for item in dialogue]
     
     def __str__(self):
         out = ""
         out += f"Question: {self.problem.text}\n"
         out += f"Solution: {self.solution}\n"
         out += f"Topic: {self.topic}\n"
-        out += f"Dialouge: \n"
-        for turn in self.dialouge:
+        out += f"dialogue: \n"
+        for turn in self.dialogue:
             out += f"{turn['role']}: {turn['content']}\n"
         out += f"--------------------------------\n"
         return out
 
 def hash_question(question: str) -> str:
     return hashlib.sha256(question.encode()).hexdigest()
-
-def load_dataset(dataset_name: str):
-    if dataset_name == "gsm8k":
-        return GSM8K()
-    else:
-        raise ValueError(f"Dataset {dataset_name} not found")
 
 class Dataset:
     def __init__(self, dataset_name: str):
@@ -74,7 +68,7 @@ class GSM8K(Dataset):
         return self.dataset
     
     
-class DialougeDataset:
+class dialogueDataset:
     def __init__(self, conversations = [], subset = 'train'):
         self.subset = subset
         self.conversations = conversations
@@ -85,32 +79,32 @@ class DialougeDataset:
     def __getitem__(self, idx):
         return self.conversations[idx]
 
-    def get_dialouge(self, flip = False):
+    def get_dialogue(self, flip = False):
         conversations = []
         for conversation in self.conversations:
-            dialouge = []
-            for turn in conversation.dialouge:
+            dialogue = []
+            for turn in conversation.dialogue:
                 if flip:
-                    dialouge.append({"role": 'assistant' if turn['role'] == 'student' else 'user', "content": turn['content']})
+                    dialogue.append({"role": 'assistant' if turn['role'] == 'student' else 'user', "content": turn['content']})
                 else:
-                    dialouge.append({"role": 'assistant' if turn['role'] == 'tutor' else 'user', "content": turn['content']})
-            conversations.append(dialouge)
+                    dialogue.append({"role": 'assistant' if turn['role'] == 'tutor' else 'user', "content": turn['content']})
+            conversations.append(dialogue)
         return conversations
 
-class StepVerify(DialougeDataset):
+class StepVerify(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/eth-lre/verify-then-generate/refs/heads/main/dataset/dataset.json'
         self.conversations = []
         for item in json.loads(requests.get(path).text):
-            dialouge = []
+            dialogue = []
             for turn in item['dialog_history']:
                 role = "student" if turn['user'] == "Student" else "tutor"
-                dialouge.append({"role": role , "content": turn['text']})
-            dialouge.append({"role": "student" , "content": item['student_correct_response']})
-            self.conversations.append(Conversation(problem = Problem(text = item['problem']), solution = item['reference_solution'], topic = item['topic'], dialouge = dialouge))
+                dialogue.append({"role": role , "content": turn['text']})
+            dialogue.append({"role": "student" , "content": item['student_correct_response']})
+            self.conversations.append(Conversation(problem = Problem(text = item['problem']), solution = item['reference_solution'], topic = item['topic'], dialogue = dialogue))
 
-class MathDial(DialougeDataset):
+class MathDial(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         """
@@ -123,7 +117,7 @@ class MathDial(DialougeDataset):
             if line == "":
                 continue
             item = json.loads(line.strip())
-            dialouge = []
+            dialogue = []
             
             for turn in item['conversation'].split("|EOM|"):
                 if len(turn.split(":")) <= 1:
@@ -138,13 +132,13 @@ class MathDial(DialougeDataset):
                 if content.startswith("("):
                     content = content.split(")")[-1].strip()
                 if 'Teacher' in entity:
-                    dialouge.append({"role": "tutor" , "content": content})
+                    dialogue.append({"role": "tutor" , "content": content})
                 else:
-                    dialouge.append({"role": "student" , "content": content})
-            dialouge.append({"role": "student" , "content": item['student_incorrect_solution']})
-            self.conversations.append(Conversation(problem = Problem(text = item['question']), solution = item['ground_truth'], topic = item['student_profile'], dialouge = dialouge))
+                    dialogue.append({"role": "student" , "content": content})
+            dialogue.append({"role": "student" , "content": item['student_incorrect_solution']})
+            self.conversations.append(Conversation(problem = Problem(text = item['question']), solution = item['ground_truth'], topic = item['student_profile'], dialogue = dialogue))
 
-class Bridge(DialougeDataset):
+class Bridge(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         if self.subset == 'train':
@@ -158,15 +152,15 @@ class Bridge(DialougeDataset):
         self.conversations = []
         lines = json.loads(requests.get(path).text)
         for item in lines:
-            dialouge = []
+            dialogue = []
             for turn in item['c_h']:
-                dialouge.append({"role": turn['user'], "content": turn['text']})
+                dialogue.append({"role": turn['user'], "content": turn['text']})
             if 'c_revision' in item:
                 for turn in item['c_revision']:
-                    dialouge.append({"role": turn['user'], "content": turn['text']})
-            self.conversations.append(Conversation(topic = item['lesson_topic'], dialouge = dialouge))
+                    dialogue.append({"role": turn['user'], "content": turn['text']})
+            self.conversations.append(Conversation(topic = item['lesson_topic'], dialogue = dialogue))
 
-class Cima(DialougeDataset):
+class Cima(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = "https://raw.githubusercontent.com/kstats/CIMA/refs/heads/master/dataset.json"
@@ -187,37 +181,37 @@ class Cima(DialougeDataset):
 
         for key in lines:
             item = lines[key]
-            dialouge = []
+            dialogue = []
             role = "tutor"
             for turn in item['past_convo']:
-                dialouge.append({"role": role, "content": turn})
+                dialogue.append({"role": role, "content": turn})
                 role = "student" if role == "tutor" else "tutor"
             img_name = item['img'].split('/')[-1].replace('"', '')
             img_path = '.cache/cima/images/CIMA-master/pictures/' + img_name
             topic = img_name.split('.')[0]
-            self.conversations.append(Conversation(problem = Problem(img = img_path), dialouge = dialouge, topic = topic))
+            self.conversations.append(Conversation(problem = Problem(img = img_path), dialogue = dialogue, topic = topic))
 
-class CoMTA(DialougeDataset):
+class CoMTA(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Khan/tutoring-accuracy-dataset/refs/heads/main/CoMTA_dataset.json'
         self.conversations = []
         lines = json.loads(requests.get(path).text)
         for item in lines:
-            dialouge = []
+            dialogue = []
             topic = item['math_level']
             for turn in item['data']:
                 if turn['role'] == 'assistant':
-                    dialouge.append({"role": "tutor", "content": turn['content']})
+                    dialogue.append({"role": "tutor", "content": turn['content']})
                 else:
-                    dialouge.append({"role": "student", "content": turn['content']})
+                    dialogue.append({"role": "student", "content": turn['content']})
             if item['expected_result'] == 'Answer Accepted':
-                dialouge.append({"role": "tutor", "content": "that is correct"})
+                dialogue.append({"role": "tutor", "content": "that is correct"})
             else:
-                dialouge.append({"role": "tutor", "content": "that is incorrect"})
-            self.conversations.append(Conversation(dialouge = dialouge, topic = topic))
+                dialogue.append({"role": "tutor", "content": "that is incorrect"})
+            self.conversations.append(Conversation(dialogue = dialogue, topic = topic))
 
-class SocraTeach(DialougeDataset):
+class SocraTeach(dialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Ljyustc/SocraticLM/refs/heads/main/data/SocraTeach_multi.json'
@@ -229,15 +223,15 @@ class SocraTeach(DialougeDataset):
             solution = items['answer']
             
             for key in items['dialogues']:
-                dialouge = []
+                dialogue = []
                 for turn in items['dialogues'][key]:
                     if "system" in turn:
-                        dialouge.append({"role": "tutor", "content": turn['system']})
+                        dialogue.append({"role": "tutor", "content": turn['system']})
                     if "user" in turn:
-                        dialouge.append({"role": "student", "content": turn['user']})
-                self.conversations.append(Conversation(problem = Problem(text = question), solution = solution, dialouge = dialouge))
+                        dialogue.append({"role": "student", "content": turn['user']})
+                self.conversations.append(Conversation(problem = Problem(text = question), solution = solution, dialogue = dialogue))
 
-class TutorChat(DialougeDataset):
+class TutorChat(dialogueDataset):
     """
     TutorChat – 80 k synthetic teacher–student conversations ⟨hf: princeton‑nlp/TutorChat⟩
     """
@@ -260,7 +254,7 @@ class TutorChat(DialougeDataset):
             topic = ": ".join(row.get("textbook_folder", "").split("/")[1:4]).strip(': ')
             
             self.conversations.append(
-                Conversation(topic=topic, dialouge=dialogue))
+                Conversation(topic=topic, dialogue=dialogue))
             
     def _row_to_dialogue(self, row) -> list[dict]:
         conv = row["conversation"] if "conversation" in row else None
@@ -323,13 +317,13 @@ class Book2Dial(Dataset):
             for line in tqdm(response_text.split('\n')):
                 item = json.loads(line)
                 history = item['history']
-                dialouge = []
+                dialogue = []
                 for i, turn in enumerate(history):
                     if i % 2 == 0:
-                        dialouge.append({"role": "tutor", "content": turn})
+                        dialogue.append({"role": "tutor", "content": turn})
                     else:
-                        dialouge.append({"role": "student", "content": turn})
-                self.conversations.append(Conversation(dialouge = dialouge))
+                        dialogue.append({"role": "student", "content": turn})
+                self.conversations.append(Conversation(dialogue = dialogue))
 
 def load_dataset(dataset_name):
     if dataset_name == 'stepwise_verify':

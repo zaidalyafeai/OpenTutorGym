@@ -1,3 +1,4 @@
+trainer_type: SFT
 seed: 3407
 dataset_text_field: text
 
@@ -10,4 +11,8 @@ logging_steps: 1
 optim: adamw_8bit
 weight_decay: 0.01
 lr_scheduler_type: linear
-report_to: none
+
+logging_steps: 1
+report_to: "wandb"
+#save_steps: 50
+output_dir: "./outputs/sft/"

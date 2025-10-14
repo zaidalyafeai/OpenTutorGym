@@ -5,10 +5,8 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from typing import Literal
-from peft import get_peft_model
-from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import multiprocessing
 import os
 import json
@@ -16,6 +14,7 @@ from tqdm import tqdm
 import asyncio
 import concurrent
 from rich import print
+from trainer import PeftModelWrapper, CustomTrainer
 
 dotenv.load_dotenv()
 
@@ -262,12 +261,12 @@ class TLLM:
     def __init__(self, model_name: str = "google/gemma-3-4B-it"):
         self.model_name = model_name
         print('loading checkpoint for ', self.model_name)
-        self.model = AutoModel.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            max_seq_length = 2048, # Choose any for long context!
+            #max_seq_length = 2048, # Choose any for long context!
             load_in_4bit = True,  # 4 bit quantization to reduce memory
             load_in_8bit = False, # [NEW!] A bit more accurate, uses 2x memory
-            full_finetuning = False, # [NEW!] We have full finetuning now!
+            #full_finetuning = False, # [NEW!] We have full finetuning now!
         )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         print('checkpoint loaded')
@@ -289,47 +288,30 @@ class TLLM:
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
 
         return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
-    
-    def fine_tune(self, dataset: List[Dict[str, Any]]):
-        conversations = dataset.get_dialouge()
+
+    def fine_tune(self, dataset: List[Dict[str, Any]], trainer_config_path: str, peft_config_path: str = None):
+        conversations = dataset.get_dialogue()
         conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
         conversations = Dataset.from_list(conversations)
         print(conversations)
-        model = peft.get_peft_model(
-            self.model,
-            r = 32,           # Choose any number > 0! Suggested 8, 16, 32, 64, 128
-            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
-                            "gate_proj", "up_proj", "down_proj",],
-            lora_alpha = 32,  # Best to choose alpha = rank or rank*2
-            lora_dropout = 0, # Supports any, but = 0 is optimized
-            bias = "none",    # Supports any, but = "none" is optimized
-            random_state = 3407,
-            use_rslora = False,   # We support rank stabilized LoRA
-            loftq_config = None,  # And LoftQ
-        )
+        
+        model = self.model
 
-        trainer = SFTTrainer(
-            model = model,
-            tokenizer = self.tokenizer,
-            train_dataset = conversations,
-            eval_dataset = None, # Can set up evaluation!
-            args = SFTConfig(
-                dataset_text_field = "text",
-                per_device_train_batch_size = 2,
-                gradient_accumulation_steps = 4, # Use GA to mimic batch size!
-                warmup_steps = 5,
-                num_train_epochs = 1, # Set this for 1 full training run.
-                learning_rate = 2e-4, # Reduce to 2e-5 for long training runs
-                logging_steps = 1,
-                optim = "adamw_8bit",
-                weight_decay = 0.01,
-                lr_scheduler_type = "linear",
-                seed = 3407,
-                report_to = "none", # Use this for WandB etc
-            ),
-        )
+        if peft_config_path:
+            peft = PeftModelWrapper(peft_config_path=peft_config_path)
+            model = peft.load_model(self.model)
+
+        trainer = CustomTrainer(
+        model=model,
+        tokenizer=self.tokenizer,
+        train_dataset=conversations,  # Replace with your training dataset
+        eval_dataset=None,   # Replace with your evaluation dataset
+        config_path=trainer_config_path,
+            ).get_trainer()
+        
         trainer_stats = trainer.train()
         return trainer_stats
+
 
 class APILLM:
 

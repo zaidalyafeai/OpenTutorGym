@@ -14,7 +14,7 @@ target_modules:            # Inject LoRA into these layers
   - up_proj
   - down_proj
 
-# Optional extras
-random_state: 3407
 use_rslora: false          # Rank-stabilized LoRA toggle
-loftq_config: null         # LoftQ (quantization-aware LoRA), keep null if unused
+# loftq_config:
+#   quant_type: "bnb_4bit"   # example — use values that match your PEFT version
+#   weight_dtype: "float16"
