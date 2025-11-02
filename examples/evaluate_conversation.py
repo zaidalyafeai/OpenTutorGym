@@ -3,13 +3,13 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
-from src.predict import Evaluator, LLM
-from src.Datasets import StepVerify
+from src.predict import LLM
+from src.evaluate import Evaluator
 from argparse import ArgumentParser
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("--judge_model", type=str, default="google/gemma-3-27b-it")
+    parser.add_argument("--judge_model", type=str, default="openai/gpt-4o")
     return parser.parse_args()
 
 def main():
@@ -17,10 +17,8 @@ def main():
     ## generate conversation
     args = parse_args()
     judge = LLM(args.judge_model, backend="openrouter")
-    evaluator = Evaluator(judge, metric='mistake_identification', eval_mode='teacher')
-    dataset = StepVerify()
-    dialouges = dataset.get_dialouge()[:10]
-    sample_conversation = [
+    evaluator = Evaluator(judge, 'mistake_identification')
+    sample_conversations = [
         [
             {"role": "assistant", "content": "What is 2 * 3 + 3?"},
             {"role": "user", "content": "I don't know. Can you help me?"},
@@ -41,23 +39,24 @@ def main():
             {"role": "assistant", "content": "Sure, the answer is 9."},
         ]
     ]
-    results = evaluator.evaluate(sample_conversation)
+    results = evaluator.evaluate(sample_conversations)
     print(results)
-    evaluator = Evaluator(judge, metric='revealing_of_the_answer', eval_mode='teacher')
-    results = evaluator.evaluate(sample_conversation) 
+    evaluator = Evaluator(judge, metric='answer_reveal')
+    results = evaluator.evaluate(sample_conversations) 
+    print(results)
 
     sample_conversation = [
         [
-            {"role": "assistant", "content": "The answer is 3*3"},
-            {"role": "user", "content": "Gold: 9"}
+            {"role": "assistant", "content": "What is 2 * 3 + 3?"},
+            {"role": "user", "content": "Answer: 9"}
         ],
 
         [
-            {"role": "assistant", "content": "The answer is 2*3 + 1"},
-            {"role": "user", "content": "Gold: 9"},
+            {"role": "assistant", "content": "What is 2 * 3 + 1?"},
+            {"role": "user", "content": "Answer: 7"},
         ]
     ]  
-    evaluator = Evaluator(judge, metric='correct_answer', eval_mode='answer')
+    evaluator = Evaluator(judge, metric='correct_answer')
     results = evaluator.evaluate(sample_conversation)   
     print(results)
 if __name__ == "__main__":

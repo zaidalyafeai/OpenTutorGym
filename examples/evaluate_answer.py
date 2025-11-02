@@ -3,8 +3,9 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tqdm import tqdm
-from src.predict import Evaluator, LLM, LLMGenerator 
-from src.Datasets import StepVerify, GSM8K
+from src.predict import LLM, LLMGenerator 
+from src.evaluate import Evaluator
+from src.Datasets import GSM8K
 from argparse import ArgumentParser
 
 def parse_args():
@@ -18,12 +19,12 @@ def main():
     
     dataset = GSM8K()
     dataset = dataset.process_dataset()
-    student_model = LLM("google/gemma-3-27b-it", backend="openrouter")
+    student_model = LLM("google/gemini-2.5-pro", backend="openrouter")
     judge_model = LLM("openai/gpt-4o", backend="openrouter")
     generator = LLMGenerator(student_model=student_model, mode= "standard")
     examples = [dataset[i] for i in range(10)]
     answers = generator.predict(examples)
-    judge = Evaluator(judge_model, metric='correct_answer', eval_mode='answer')
+    judge = Evaluator(judge_model, metric='correct_answer')
     
     # create conversations
     conversations = []
