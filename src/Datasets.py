@@ -10,15 +10,20 @@ from tqdm import tqdm
 import re
 from itertools import islice
 
+from transformers import ImageGPTForCausalImageModeling
+
 class Problem:
     def __init__(self, text = '', img = None):
         self.text = text
         if img is not None:
-            if os.path.exists(img):
-                self.img = Image.open(img).convert('RGB')
+            
+            if isinstance(img, str):
+                if os.path.exists(img):
+                    self.img = Image.open(img).convert('RGB')
+                else:
+                    self.img = None
             else:
-                self.img = None
-                # print(f"Image {img} not found")
+                self.img = img
         else:
             self.img = None
 
@@ -68,7 +73,7 @@ class GSM8K(Dataset):
         return self.dataset
     
     
-class dialogueDataset:
+class DialogueDataset:
     def __init__(self, conversations = [], subset = 'train'):
         self.subset = subset
         self.conversations = conversations
@@ -91,7 +96,7 @@ class dialogueDataset:
             conversations.append(dialogue)
         return conversations
 
-class StepVerify(dialogueDataset):
+class StepVerify(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/eth-lre/verify-then-generate/refs/heads/main/dataset/dataset.json'
@@ -104,7 +109,7 @@ class StepVerify(dialogueDataset):
             dialogue.append({"role": "student" , "content": item['student_correct_response']})
             self.conversations.append(Conversation(problem = Problem(text = item['problem']), solution = item['reference_solution'], topic = item['topic'], dialogue = dialogue))
 
-class MathDial(dialogueDataset):
+class MathDial(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         """
@@ -138,7 +143,7 @@ class MathDial(dialogueDataset):
             dialogue.append({"role": "student" , "content": item['student_incorrect_solution']})
             self.conversations.append(Conversation(problem = Problem(text = item['question']), solution = item['ground_truth'], topic = item['student_profile'], dialogue = dialogue))
 
-class Bridge(dialogueDataset):
+class Bridge(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         if self.subset == 'train':
@@ -160,7 +165,7 @@ class Bridge(dialogueDataset):
                     dialogue.append({"role": turn['user'], "content": turn['text']})
             self.conversations.append(Conversation(topic = item['lesson_topic'], dialogue = dialogue))
 
-class Cima(dialogueDataset):
+class Cima(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = "https://raw.githubusercontent.com/kstats/CIMA/refs/heads/master/dataset.json"
@@ -191,7 +196,7 @@ class Cima(dialogueDataset):
             topic = img_name.split('.')[0]
             self.conversations.append(Conversation(problem = Problem(img = img_path), dialogue = dialogue, topic = topic))
 
-class CoMTA(dialogueDataset):
+class CoMTA(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Khan/tutoring-accuracy-dataset/refs/heads/main/CoMTA_dataset.json'
@@ -211,7 +216,7 @@ class CoMTA(dialogueDataset):
                 dialogue.append({"role": "tutor", "content": "that is incorrect"})
             self.conversations.append(Conversation(dialogue = dialogue, topic = topic))
 
-class SocraTeach(dialogueDataset):
+class SocraTeach(DialogueDataset):
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Ljyustc/SocraticLM/refs/heads/main/data/SocraTeach_multi.json'
@@ -231,7 +236,7 @@ class SocraTeach(dialogueDataset):
                         dialogue.append({"role": "student", "content": turn['user']})
                 self.conversations.append(Conversation(problem = Problem(text = question), solution = solution, dialogue = dialogue))
 
-class TutorChat(dialogueDataset):
+class TutorChat(DialogueDataset):
     """
     TutorChat – 80 k synthetic teacher–student conversations ⟨hf: princeton‑nlp/TutorChat⟩
     """
@@ -325,6 +330,20 @@ class Book2Dial(Dataset):
                         dialogue.append({"role": "student", "content": turn})
                 self.conversations.append(Conversation(dialogue = dialogue))
 
+class TutorBench(DialogueDataset):
+    def __init__(self, subset = 'train'):
+        self.subset = subset
+        self.dataset = datasets.load_dataset("tutorbench/tutorbench", split = "train")
+        self.conversations = []
+        for item in self.dataset:
+            dialogue = []
+            dialogue.append({"role": "student", "content": item['PROMPT']})
+            dialogue.append({"role": "tutor", "content": item['UC1_INITIAL_EXPLANATION']})
+            dialogue.append({"role": "student", "content": item['FOLLOW_UP_PROMPT']})
+            self.conversations.append(Conversation(dialogue = dialogue, topic = item['SUBJECT'], problem = Problem(text = item['PROMPT'], img = item['Image'])))
+    
+
+        
 def load_dataset(dataset_name):
     if dataset_name == 'stepwise_verify':
         return StepVerify()
@@ -346,6 +365,8 @@ def load_dataset(dataset_name):
         return SocraTeach()
     elif dataset_name == 'book2dial':
         return Book2Dial()
+    elif dataset_name == 'tutor_bench':
+        return TutorBench()
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
@@ -397,3 +418,8 @@ if __name__ == "__main__":
     print('Book2Dial')
     dataset = load_dataset('book2dial')
     print(dataset.conversations[0])
+
+    print('TutorBench')
+    dataset = load_dataset('tutor_bench')
+    print(dataset.conversations[0])
+    
