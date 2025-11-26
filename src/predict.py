@@ -184,7 +184,7 @@ class LLMGenerator:
         max_turns: int = 20,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
-        """Generate a conversation between a student and a math tutor"""
+        """Generate a conversation between a student and a tutor"""
         # System prompts for each agent
         student_system = f"""You speak in {language}.
         Never forget you are a Student in {student_level} and I am a Tutor. Never flip roles! You will always ask questions, never instruct me or ask me to solve the problem.
@@ -250,7 +250,7 @@ class LLMGenerator:
         max_turns: int = 20,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
-        """Generate a conversation between a student and a math tutor"""
+        """Generate a conversation between a student and a tutor"""
         # System prompts for each agent
         student_system = f"""You speak in {language}.
         Never forget you are a Student in {student_level} and I am a Tutor. Never flip roles! You will always ask questions, never instruct me or ask me to solve the problem.
