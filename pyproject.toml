@@ -8,6 +8,7 @@ dependencies = [
     "bitsandbytes==0.42.0",
     "dotenv>=0.9.9",
     "gradio>=5.44.1",
+    "matplotlib>=3.10.7",
     "ollama>=0.5.3",
     "openai>=1.100.0",
     "peft>=0.17.0",
