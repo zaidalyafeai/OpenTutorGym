@@ -110,9 +110,10 @@ class TLLM:
 
 class APILLM:
 
-    def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8787", backend: str = "openrouter"):
+    def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8787", host: str = "localhost", backend: str = "openrouter"):
         self.model = model
         self.port = port
+        self.host = host
         self.backend = backend
         print("Model: ", self.model)
         print("Backend: ", self.backend)
@@ -127,10 +128,10 @@ class APILLM:
             api_base = "https://openrouter.ai/api/v1"
         elif self.backend == "ollama":
             api_key = "ollama"
-            api_base = f"http://localhost:{self.port}/v1"
+            api_base = f"http://{self.host}:{self.port}/v1"
         elif self.backend == "vllm":
             api_key = "EMPTY"
-            api_base = f"http://localhost:{self.port}/v1"
+            api_base = f"http://{self.host}:{self.port}/v1"
         else:
             raise ValueError(f"Invalid model: {self.model}")
         
@@ -222,7 +223,11 @@ class LLMGenerator:
         for turn_id in range(max_turns):
             if log:
                 print("Turn ID: ", turn_id)
-            response = self.student_model.get_llm_response(student_messages)
+            try:
+                response = self.student_model.get_llm_response(student_messages)
+            except Exception as e:
+                print(f"Error during API call: {str(e)}")
+                break
             conversation.append({"role": "Student", "content": response})
             student_messages.append({"role": "assistant", "content": response})
             tutor_messages.append({"role": "user", "content": response})
@@ -230,7 +235,11 @@ class LLMGenerator:
             if log:
                 print("Student: ", conversation[-1]["content"])
 
-            response = self.tutor_model.get_llm_response(tutor_messages)
+            try:
+                response = self.tutor_model.get_llm_response(tutor_messages)
+            except Exception as e:
+                print(f"Error during API call: {str(e)}")
+                break
             conversation.append({"role": "Tutor", "content": response})
             student_messages.append({"role": "user", "content": response})
             tutor_messages.append({"role": "assistant", "content": response})
@@ -238,7 +247,7 @@ class LLMGenerator:
             if log:
                 print("Tutor: ", conversation[-1]["content"])
 
-            if "<END>" in response:
+            if "<END>" in response or 'END' in response:
                 print("--------------------------------")
                 break
                 
