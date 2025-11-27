@@ -7,6 +7,7 @@ import hashlib
 import datasets
 from tqdm import tqdm
 
+from torch.utils.data import Dataset
 import re
 from itertools import islice
 
@@ -58,6 +59,197 @@ class Dataset:
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 
+
+
+
+# -------------------------------------------- VLMs Datasets --------------------------------------------
+class MathVision(Dataset):
+    def __init__(self, split="test"):
+        self.dataset_name = "MathVision"
+        self.split = split
+        self.hf_name = "MathLLMs/MathVision"
+        self.dataset = datasets.load_dataset(self.hf_name)[self.split]
+
+    def _normalize(self, x):
+        return {
+            "id": x.get("id", hash_question(x.get("question", ""))),
+            "question": x.get("question", ""),
+            "option": x.get("option", []),
+            "image_path": x.get("image", None),
+            "image": x.get("decoded_image", None),
+            "answer": x.get("answer", None),
+            "solution": x.get("solution", None),
+            "level": x.get("level", None),
+            "subject": x.get("subject", None),
+        }
+
+    def process_dataset(self):
+        self.dataset = self.dataset.map(lambda x: self._normalize(x))
+        return self.dataset
+
+class ScienceQA(Dataset):
+    def __init__(self, split="test"):
+        self.dataset_name = "ScienceQA"
+        self.split = split
+        self.hf_name = "derek-thomas/ScienceQA"
+        self.dataset = datasets.load_dataset(self.hf_name)[self.split]
+
+    def _normalize_example(self, x):
+        image = x.get("image") or x.get("img") or None
+
+        question = x.get("question") or x.get("prompt") or ""
+
+        choices = x.get("choices") or x.get("options") or []
+        if isinstance(choices, str):
+            try:
+                import ast
+                choices = ast.literal_eval(choices)
+            except Exception:
+                choices = [choices]
+
+        raw_ans = x.get("answer", None)
+        answer = None
+        if raw_ans is None:
+            answer = None
+        else:
+            if isinstance(raw_ans, int):
+                answer = raw_ans
+            else:
+                try:
+                    answer = int(raw_ans)
+                except Exception:
+                    try:
+                        answer = choices.index(raw_ans)
+                    except Exception:
+                        answer = None
+
+        return {
+            "image": image,
+            "question": question,
+            "choices": choices,
+            "answer": answer,
+            "hint": x.get("hint", None),
+            "task": x.get("task", None),
+            "grade": x.get("grade", None),
+            "subject": x.get("subject", None),
+            "topic": x.get("topic", None),
+            "category": x.get("category", None),
+            "skill": x.get("skill", None),
+            "lecture": x.get("lecture", None),
+            "solution": x.get("solution", None),
+        }
+
+    def process_dataset(self):
+        self.dataset = self.dataset.map(lambda x: self._normalize_example(x))
+        self.dataset = self.dataset.map(lambda x: {"id": hash_question(x["question"])})
+        return self.dataset
+
+
+# -------------------------------------------- Bio/Medical Datasets --------------------------------------------
+class BioASQ(Dataset):
+    def __init__(self, split="test"):
+        self.dataset_name = "BioASQ"
+        self.split = split
+        self.hf_name = "lucadiliello/bioasqqa"
+        self.dataset = datasets.load_dataset(self.hf_name)[self.split]
+
+    def _normalize(self, x):
+        return {
+            "id": x.get("key", None),
+            "context": x.get("context", ""),
+            "question": x.get("question", ""),
+            "answers": x.get("answers", []),
+            "labels": x.get("labels", []),
+        }
+
+    def process_dataset(self):
+        self.dataset = self.dataset.map(lambda x: self._normalize(x))
+        return self.dataset
+
+class MoleculeQA(Dataset):
+    def __init__(self, split="test"):
+        self.hf_name = "hcaoaf/MoleculeQA"
+        self.split = split
+        self.dataset = datasets.load_dataset(self.hf_name)[self.split]
+
+    def _normalize_example(self, rows_chunk):
+        """
+        Convert a 8-row chunk of text into a QA example.
+        rows_chunk: list of 8 strings [prompt, SMILES, question, option A-D, answer]
+        """
+        try:
+            cid = rows_chunk[1].split(": ", 1)[1].strip()
+            question = rows_chunk[2].split(": ", 1)[1].strip()
+            options = [r.split(": ", 1)[1].strip() for r in rows_chunk[3:7]]
+            answer_letter = rows_chunk[7].strip().strip('"').strip("\t")
+            key = ord(answer_letter.upper()) - ord("A")
+            labels = [1 if j == key else 0 for j in range(4)]
+            return {
+                "id": hash_question(question),
+                "context": cid,
+                "question": question,
+                "options": options,
+                "answer": key,
+                "labels": labels
+            }
+        except Exception:
+            return None  
+
+    def process_dataset(self):
+        
+        rows = [x['text'] for x in self.dataset]
+        rows = rows[1:]
+
+        examples = []
+        i = 0
+        while i + 7 < len(rows):
+            chunk = rows[i:i+8]
+            ex = self._normalize_example(chunk)
+            if ex is not None:
+                examples.append(ex)
+            i += 8  
+
+        self.dataset = examples
+        return self.dataset
+
+class PubMedQA:
+    def __init__(self, path_to_json):
+        """
+        path_to_json: path to the pre-split JSON file, e.g. pqaa_dev_set.json
+        """
+        with open(path_to_json, "r") as f:
+            self.dataset = json.load(f)
+
+    def _normalize_example(self, info):
+        """
+        Normalize each entry to standard QA fields
+        """
+        question = info.get("QUESTION")
+        context = info.get("CONTEXTS")           # abstract without conclusion
+        long_answer = info.get("LONG_ANSWER")   # conclusion
+        final_decision = info.get("final_decision")  # yes / no / maybe
+
+        label_map = {"yes": 0, "no": 1, "maybe": 2}
+        label = label_map.get(short_answer.lower(), None)
+
+        return {
+            "id": hash_question(question),
+            "context": context,
+            "question": question,
+            "answer": long_answer,
+            "final_decision": final_decision,
+            "label": label
+        }
+
+    def process_dataset(self):
+        """
+        Convert the JSON dict into a list of normalized examples
+        """
+        processed = [self._normalize_example(info) for pmid, info in self.dataset.items()]
+        self.dataset = processed
+        return self.dataset
+
+# -------------------------------------------- LLMs Datasets QA --------------------------------------------
 class GSM8K(Dataset):
     def __init__(self, split = "test"):
         self.dataset_name = "gsm8k"
@@ -66,7 +258,6 @@ class GSM8K(Dataset):
         self.hf_name = "openai/gsm8k"
         self.dataset = datasets.load_dataset(self.hf_name, self.subset)[self.split]
 
-    
     def process_dataset(self):
         self.dataset = self.dataset.map(lambda x: {"question": x['question'], "answer": x['answer'].split("####")[1].strip()})
         self.dataset = self.dataset.map(lambda x: {"id": hash_question(x["question"])})
@@ -342,9 +533,7 @@ class TutorBench(DialogueDataset):
             dialogue.append({"role": "student", "content": item['FOLLOW_UP_PROMPT']})
             self.conversations.append(Conversation(dialogue = dialogue, topic = item['SUBJECT'], problem = Problem(text = item['PROMPT'], img = item['Image'])))
     
-
-        
-def load_dataset(dataset_name):
+def load_dataset(dataset_name, path_to_json=None):
     if dataset_name == 'stepwise_verify':
         return StepVerify()
     elif dataset_name == 'mathdial':
@@ -361,65 +550,106 @@ def load_dataset(dataset_name):
         return TutorEval()
     elif dataset_name == 'gsm8k':
         return GSM8K()
+    elif dataset_name == 'mathvision':
+        return MathVision()
+    elif dataset_name == 'scienceqa':
+        return ScienceQA()
+    elif dataset_name == 'bioasq':
+        return BioASQ()
+    elif dataset_name == 'moleculeqa':
+        return MoleculeQA()
     elif dataset_name == 'socra_teach':
         return SocraTeach()
-    elif dataset_name == 'book2dial':
-        return Book2Dial()
-    elif dataset_name == 'tutor_bench':
-        return TutorBench()
+    elif dataset_name == 'pubmedqa':
+        if path_to_json is None:
+            raise ValueError("path_to_json must be provided for PubMedQA dataset")
+        return PubMedQA(path_to_json)
     else:
         raise ValueError(f"Dataset {dataset_name} not found")
 
 if __name__ == "__main__":
-    print('Stepwise Verify')
-    dataset = load_dataset('stepwise_verify')
-    print(dataset.conversations[0])
+    # print('Stepwise Verify')
+    # dataset = load_dataset('stepwise_verify')
+    # print(dataset.conversations[0])
 
-    print('MathDial')
-    dataset = load_dataset('mathdial')
-    print(dataset.conversations[0])
+    # print('MathDial')
+    # dataset = load_dataset('mathdial')
+    # print(dataset.conversations[0])
 
-    print('Bridge')
-    dataset = load_dataset('bridge')
-    print(dataset.conversations[0])
+    # print('Bridge')
+    # dataset = load_dataset('bridge')
+    # print(dataset.conversations[0])
 
-    print('Cima')
-    dataset = load_dataset('cima')
-    print(dataset.conversations[0])
+    # print('Cima')
+    # dataset = load_dataset('cima')
+    # print(dataset.conversations[0])
 
-    print('CoMTA')
-    dataset = load_dataset('comta')
-    print(dataset.conversations[0])
+    # print('CoMTA')
+    # dataset = load_dataset('comta')
+    # print(dataset.conversations[0])
 
-    print('TutorChat')
-    dataset = load_dataset('tutor_chat')
-    print(dataset.conversations[0])
+    # print('TutorChat')
+    # dataset = load_dataset('tutor_chat')
+    # print(dataset.conversations[0])
 
-    print('TutorEval')
-    dataset = load_dataset('tutor_eval')
+    # print('TutorEval')
+    # dataset = load_dataset('tutor_eval')
+    # dataset = dataset.process_dataset()
+
+    # print('SocraTeach')
+    # dataset = load_dataset('socra_teach')
+    # print(dataset.conversations[0])
+
+    # VLMs Dataset sample
+    print('MathVision')
+    dataset = load_dataset('mathvision')
     dataset = dataset.process_dataset()
+    print(dataset[0])
+
+
+    print('ScienceQA')
+    dataset = load_dataset('scienceqa')
+    dataset = dataset.process_dataset()
+    print(dataset[0])
+    
+    # Bio/Medical Dataset 
+
+    print('BioASQ')
+    dataset = load_dataset('bioasq')
+    dataset = dataset.process_dataset()
+    print(dataset[0])
+
+    print('MoleculeQA Test')
+    dataset = load_dataset('moleculeqa')
+    dataset = dataset.process_dataset()
+    print(dataset[0])
+
+    print('PubMedQA Test')
+    dataset = load_dataset('pubmedqa', path_to_json='pqaa_dev_set.json')
+    dataset = dataset.process_dataset()
+
     for i, item in enumerate(dataset):
         print(f"ID: {item['id']}")
         print(f"Question: {item['question']}")
-        print(f"Key Points: {item['key_points']}")
-        print(f"Closed Book: {item['closed_book']}")
-        print(f"Answer in Chapter: {item['answer_in_chapter']}")
-        print(f"Misleading Question: {item['misleading_question']}")
-        print(f"Difficulty: {item['difficulty']}")
-        print(f"Domain: {item['domain']}")
-        print(f"Path to Chapter: {item['path_to_chapter']}")
+        for label, key in [
+            ("Key Points", "key_points"),
+            ("Closed Book", "closed_book"),
+            ("Answer in Chapter", "answer_in_chapter"),
+            ("Misleading Question", "misleading_question"),
+            ("Difficulty", "difficulty"),
+            ("Domain", "domain"),
+            ("Path to Chapter", "path_to_chapter"),
+            ("Context", "context"),
+            ("Answer", "answer"),
+            ("Key", "key"),
+            ("Image", "image"),
+            ("Options", "options")
+        ]:
+            if key in item:
+                print(f"{label}: {item[key]}")
+
         print('--------------------------------')
         break
 
-    print('SocraTeach')
-    dataset = load_dataset('socra_teach')
-    print(dataset.conversations[0])
-
-    print('Book2Dial')
-    dataset = load_dataset('book2dial')
-    print(dataset.conversations[0])
-
-    print('TutorBench')
-    dataset = load_dataset('tutor_bench')
-    print(dataset.conversations[0])
+   
     
