@@ -12,3 +12,4 @@ dcgm/
 .cache/
 
 unsloth_compiled_cache/
+wandb/
