@@ -1,14 +1,17 @@
+import json
+
 class Metric:
     def __init__(self, metric_name: str):
         self.metric_name = metric_name
     
     def calculate_score(self, response):
         if response.lower() == 'yes':
-            return 1
+            score = 1
         elif response.lower() == 'to some extent':
-            return 0.5
+            score = 0.5
         else:
-            return 0
+            score = 0
+        return {self.metric_name: score}
 
 class MistakeIdentification(Metric):
     def __init__(self):
@@ -23,16 +26,16 @@ class AnswerReveal(Metric):
     def __init__(self):
         super().__init__('answer_reveal')
         self.system_prompt = """You are given a conversation between tutor and student. 
-        Does the tutor reveal the final answer?
+        Does the tutor reveal the final answer to the student?
         Return:
         Yes, No
         """
     
     def calculate_score(self, response):
         if response.lower() == 'yes':
-            return 0
+            return {self.metric_name: 0}
         else:
-            return 1
+            return {self.metric_name: 1}
 
 class ProvidingGuidance(Metric):
     def __init__(self):
@@ -118,26 +121,26 @@ class TutorTone(Metric):
     
     def calculate_score(self, response):
         if response.lower() == 'encouraging':
-            return 1
+            return {self.metric_name: 1}
         elif response.lower() == 'neutral':
-            return 0.5
+            return {self.metric_name: 0.5}
         else:
-            return 0
+            return {self.metric_name: 0}
 
 class CorrectAnswer(Metric):
     def __init__(self):
         super().__init__('correct_answer')
         self.system_prompt = """You are given a conversation between tutor and student. 
-        you need to judge if the provided answer matches the gold answer.
+        you need to judge if the provided answer by the student is correct.
         Return:
         Yes, No
         """
     
     def calculate_score(self, response):
         if response.lower() == 'yes':
-            return 1
+            return {self.metric_name: 1}
         else:
-            return 0
+            return {self.metric_name: 0}
 
 class Coherence(Metric):
     def __init__(self):
@@ -175,37 +178,53 @@ class Care(Metric):
         Yes, To some extent, No
         """
 
-def load_metric(metric_name: str) -> Metric:
-    if metric_name == 'mistake_identification':
-        return MistakeIdentification()
-    elif metric_name == 'answer_reveal':
-        return AnswerReveal()
-    elif metric_name == 'providing_guidance':
-        return ProvidingGuidance()
-    elif metric_name == 'tutor_tone':
-        return TutorTone()
-    elif metric_name == 'correct_answer':
-        return CorrectAnswer()
-    elif metric_name == 'support':
-        return Support()
-    elif metric_name == 'feedback':
-        return Feedback()
-    elif metric_name == 'clarity':
-        return Clarity()
-    elif metric_name == 'helpfulness':
-        return Helpfulness()
-    elif metric_name == 'creativity':
-        return Creativity()
-    elif metric_name == 'self_correction':
-        return SelfCorrection()
-    elif metric_name == 'overload':
-        return OverLoad()
-    elif metric_name == 'actionability':
-        return Actionability()
-    elif metric_name == 'informativeness':
-        return Informativeness()
-    elif metric_name == 'care':
-        return Care()
-    else:
-        raise ValueError(f"Invalid metric: {metric_name}")
-        
+all_metrics = {
+    'mistake_identification': MistakeIdentification(),
+    'answer_reveal': AnswerReveal(),
+    'providing_guidance': ProvidingGuidance(),
+    'tutor_tone': TutorTone(),
+    'correct_answer': CorrectAnswer(),
+    'support': Support(),
+    'feedback': Feedback(),
+    'clarity': Clarity(),
+    'helpfulness': Helpfulness(),
+    'creativity': Creativity(),
+    'self_correction': SelfCorrection(),
+    'overload': OverLoad(),
+    'actionability': Actionability(),
+    'informativeness': Informativeness(),
+    'care': Care()
+}
+
+class AggregatedMetric(Metric):
+    def __init__(self, metrics: list[str]):
+        super().__init__('aggregated_metric')
+        self.metrics = metrics
+        self.system_prompt = ""
+        output_json = ""
+        for i, metric_name in enumerate(metrics):
+            self.system_prompt += all_metrics[metric_name].system_prompt
+            comma = ", " if i < len(metrics) - 1 else ""
+            output_json += f'"{metric_name}": answer{comma}\n'
+        self.system_prompt += f"""
+        return a JSON object with the following keys:
+        {output_json}
+        """
+    def fix_json(self, response: str):
+        response = response.replace("```", "")
+        response = response.replace("json", "")
+        return response
+
+    def calculate_score(self, response: str):
+        try:
+            fixed_response = self.fix_json(response)
+            response = json.loads(fixed_response)
+            return {metric_name: all_metrics[metric_name].calculate_score(response[metric_name])[metric_name] for metric_name in self.metrics}
+        except Exception as e:
+            print(f"Error evaluating conversation: {str(e)}")
+            return {metric_name: 0.0 for metric_name in self.metrics}
+    
+def load_metric(metric_names: list[str]):
+    if len(metric_names) > 1:
+        return AggregatedMetric(metric_names)
+    return all_metrics[metric_names[0]]        
