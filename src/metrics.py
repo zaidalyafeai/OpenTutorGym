@@ -4,10 +4,26 @@ class Metric:
     def __init__(self, metric_name: str):
         self.metric_name = metric_name
     
+    def parse_response(self, response):
+        response = response.strip()
+
+        # Try to parse as JSON if it looks like JSON
+        if response.strip().startswith('{'):
+            try:
+                parsed = json.loads(response)
+                if isinstance(parsed, dict) and 'answer' in parsed:
+                    return parsed['answer']
+            except json.JSONDecodeError:
+                print('some error here')
+                pass
+        
+        return response
+        
     def calculate_score(self, response):
-        if response.lower() == 'yes':
+        parsed_response = self.parse_response(response)
+        if parsed_response.lower() == 'yes':
             score = 1
-        elif response.lower() == 'to some extent':
+        elif parsed_response.lower() == 'to some extent':
             score = 0.5
         else:
             score = 0
@@ -18,8 +34,9 @@ class MistakeIdentification(Metric):
         super().__init__('mistake_identification')
         self.system_prompt = """You are given a conversation between tutor and student. 
         Has the tutor identified a mistake in the student’s response?
+        If there are no mistakes then the answer should be Yes.
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/To some extent/No"}
         """
 
 class AnswerReveal(Metric):
@@ -28,14 +45,8 @@ class AnswerReveal(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor reveal the final answer to the student?
         Return:
-        Yes, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
-    
-    def calculate_score(self, response):
-        if response.lower() == 'yes':
-            return {self.metric_name: 0}
-        else:
-            return {self.metric_name: 1}
 
 class ProvidingGuidance(Metric):
     def __init__(self):
@@ -43,7 +54,7 @@ class ProvidingGuidance(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor offer correct and relevant guidance?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
             
 class Helpfulness(Metric):
@@ -52,7 +63,7 @@ class Helpfulness(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the tutor’s response helpful to the student?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class Creativity(Metric):
@@ -61,7 +72,7 @@ class Creativity(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the tutor’s response creative and engaging?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class Clarity(Metric):
@@ -70,7 +81,7 @@ class Clarity(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the tutor’s response clear and easy to understand?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class SelfCorrection(Metric):
@@ -79,7 +90,7 @@ class SelfCorrection(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor encourage the student to correct their own mistakes?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class OverLoad(Metric):
@@ -88,7 +99,7 @@ class OverLoad(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor provide too much information?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class Feedback(Metric):
@@ -97,7 +108,7 @@ class Feedback(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the feedback of the tutor response is helpful and specific?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 class Support(Metric):
@@ -106,7 +117,7 @@ class Support(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the tutor’s response supportive and encouraging?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
 
 
@@ -116,13 +127,15 @@ class TutorTone(Metric):
         self.system_prompt = """You are given a conversation. 
         What is the tone of the tutor’s response?
         Return:
-        Encouraging, Neutral, Offensive
+        {"reasoning": "brief explanation", "answer": "Encouraging/Neutral/Offensive"}
         """
     
     def calculate_score(self, response):
-        if response.lower() == 'encouraging':
+        answer = self.parse_response(response)
+        
+        if answer.lower() == 'encouraging':
             return {self.metric_name: 1}
-        elif response.lower() == 'neutral':
+        elif answer.lower() == 'neutral':
             return {self.metric_name: 0.5}
         else:
             return {self.metric_name: 0}
@@ -133,11 +146,12 @@ class CorrectAnswer(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         you need to judge if the provided answer by the student is correct.
         Return:
-        Yes, No
+        {"reasoning": "brief explanation", "answer": "Yes/No"}
         """
     
     def calculate_score(self, response):
-        if response.lower() == 'yes':
+        answer = self.parse_response(response)
+        if answer.lower() == 'yes':
             return {self.metric_name: 1}
         else:
             return {self.metric_name: 0}
@@ -148,7 +162,7 @@ class Coherence(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Is the conversation coherent and easy to follow?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/To some extent/No"}
         """
 
 class Actionability(Metric):
@@ -157,7 +171,7 @@ class Actionability(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor provide actionability of the feedback through nudges, questions, and hints?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/To some extent/No"}
         """
 
 class Informativeness(Metric):
@@ -166,7 +180,7 @@ class Informativeness(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor provide relevant information to the student in each turn?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/To some extent/No"}
         """
 
 class Care(Metric):
@@ -175,7 +189,7 @@ class Care(Metric):
         self.system_prompt = """You are given a conversation between tutor and student. 
         Does the tutor show care and empathy towards the student?
         Return:
-        Yes, To some extent, No
+        {"reasoning": "brief explanation", "answer": "Yes/To some extent/No"}
         """
 
 all_metrics = {
