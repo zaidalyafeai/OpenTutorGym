@@ -143,7 +143,9 @@ class APILLM:
         try:
             response = client.chat.completions.create(
                 model=self.model, 
-                messages=contexts
+                messages=contexts,
+                temperature=0,
+                max_tokens=1024
             )
             
             # print(f"API Response: {response}")
