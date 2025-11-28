@@ -17,7 +17,7 @@ def main():
     ## generate conversation
     args = parse_args()
     judge = LLM(args.judge_model, backend="openrouter")
-    evaluator = Evaluator(judge, ['answer_reveal', 'mistake_identification'])
+    evaluator = Evaluator(judge, ['answer_reveal'])
     sample_conversations = [
         [
             {"role": "assistant", "content": "What is 2 * 3 + 3?"},
