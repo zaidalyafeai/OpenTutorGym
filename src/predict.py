@@ -11,8 +11,8 @@ import os
 from tqdm import tqdm
 import concurrent
 from rich import print
-# from src.trainer import PeftModelWrapper, CustomTrainer
-from src.metrics import Metric, load_metric
+from src.trainer import PeftModelWrapper, CustomTrainer
+from peft import PeftModel
 dotenv.load_dotenv()
 
 class JudgeResponse(BaseModel):
@@ -90,14 +90,13 @@ class TLLM:
         conversations = Dataset.from_list(conversations)
         print(conversations)
         
-        model = self.model
 
         if peft_config_path:
             peft = PeftModelWrapper(peft_config_path=peft_config_path)
-            model = peft.load_model(self.model)
+            self.peft_model = peft.load_model(self.model)
 
         trainer = CustomTrainer(
-        model=model,
+        model=self.peft_model,
         tokenizer=self.tokenizer,
         train_dataset=conversations,  # Replace with your training dataset
         eval_dataset=None,   # Replace with your evaluation dataset
@@ -106,6 +105,16 @@ class TLLM:
         
         trainer_stats = trainer.train()
         return trainer_stats
+    
+    def save_model(self, checkpoint_path: str):
+        lora_adapter = "./lora_adapter"
+        self.peft_model.save_pretrained(lora_adapter, save_adapter=True, save_config=True)
+
+        model_to_merge = PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained(self.model_name).to("cuda"), lora_adapter)
+
+        merged_model = model_to_merge.merge_and_unload()
+        merged_model.save_pretrained(checkpoint_path)
+        self.tokenizer.save_pretrained(checkpoint_path)
 
 
 class APILLM:
