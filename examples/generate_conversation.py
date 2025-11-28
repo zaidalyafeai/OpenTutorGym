@@ -37,7 +37,7 @@ def main():
         )
         conversations.append(conversation)
     tutor_model_name = args.tutor_model.split("/")[-1]
-    with open(f"conversations_{tutor_model_name}.json", "w") as f:
+    with open(f"examples/conversations_{tutor_model_name}.json", "w") as f:
         json.dump(conversations, f, indent=4)
 
     # evaluate
