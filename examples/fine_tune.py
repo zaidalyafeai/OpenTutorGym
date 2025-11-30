@@ -2,11 +2,21 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
 from src.Datasets import load_dataset
 from src.predict import TLLM
+import argparse
 
-dataset = load_dataset('socra_teach')
-model = TLLM(model_name="../models/Qwen2.5-7B-Instruct")
-model.fine_tune(dataset, trainer_config_path="src/configs/sft_config.yaml", peft_config_path="src/configs/lora_config.yaml")
-model.save_model("../models/Qwen2.5-7B-Instruct-lora")
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type=str, default="Qwen2.5-7B-Instruct")
+    parser.add_argument("--dataset", type=str, default="socra_teach")
+    args = parser.parse_args()
+
+    dataset = load_dataset(args.dataset)
+    model = TLLM(model_name=args.model_name)
+    model.fine_tune(dataset)
+    model.save_model(f"{args.model_name}-lora")
+
+if __name__ == "__main__":
+    main()
+    
