@@ -14,6 +14,8 @@ from rich import print
 from src.trainer import PeftModelWrapper, CustomTrainer
 from peft import PeftModel
 import time
+from src.utils import image_to_base64
+
 dotenv.load_dotenv()
 
 class JudgeResponse(BaseModel):
@@ -208,6 +210,7 @@ class LLMGenerator:
     def predict_conversation(
         self,
         question: str,
+        image: bytes = None,
         language: str = "English",
         student_level: str = "Middle School",
         max_turns: int = 20,
@@ -233,6 +236,14 @@ class LLMGenerator:
         """
 
         # Initialize message history
+        if image is not None:
+            # Convert image bytes to base64
+            
+            question = [
+                {"type": "text", "text": question},
+                {"type": "image_url", "image_url": {"url": image_to_base64(image)}}
+            ]
+
         student_messages = [
             {"role": "system", "content": student_system},
             {"role": "user", "content": question},
