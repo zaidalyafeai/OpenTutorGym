@@ -1,0 +1,10 @@
+import base64
+import hashlib
+
+def image_to_base64(image):
+    base64_image = base64.b64encode(image).decode('utf-8')
+    return f"data:image/jpeg;base64,{base64_image}"
+
+def hash_question(question: str) -> str:
+    return hashlib.sha256(question.encode()).hexdigest()
+    
