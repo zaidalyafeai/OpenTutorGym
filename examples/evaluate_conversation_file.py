@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tqdm import tqdm
 from src.predict import LLM
 from src.evaluate import Evaluator
 from argparse import ArgumentParser
@@ -40,7 +39,6 @@ def main():
         print(row)
     
     df = pd.DataFrame(results)
-    print(df)
     df.to_csv("results.csv", index=False)
 
 if __name__ == "__main__":

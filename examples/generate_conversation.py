@@ -40,9 +40,6 @@ def main():
     with open(f"examples/conversations_{tutor_model_name}.json", "w") as f:
         json.dump(conversations, f, indent=4)
 
-    # evaluate
     
 if __name__ == "__main__":
-
-    # asyncio.run(main())
     main()
