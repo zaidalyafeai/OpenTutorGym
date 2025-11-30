@@ -50,6 +50,16 @@ To fine-tune a model, you can use the `scripts/fine_tune.slurm` script. It will 
 sbatch scripts/fine_tune.slurm
 ```
 
+## Examples
+
+We provide multiple examples in the `examples` directory. You can run them using `uv run <example_name>`
+1. `finetune_dpo.py` - Finetunes a model using DPO
+2. `finetune_sft.py` - Finetunes a model using SFT
+3. `inspect_dataset.py` - Inspects a dataset
+4. `evaluate_conversation.py` - Evaluates a conversation using a model
+5. `generate_conversation.py` - Generates a conversation using a model
+6. `generate_conversation_image.py` - Generates a conversation from a vision dataset
+
 ## License 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
