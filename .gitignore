@@ -13,3 +13,8 @@ dcgm/
 
 unsloth_compiled_cache/
 wandb/
+outputs/
+lora_adapter
+examples/*.json
+examples/*.png
+slurm/
