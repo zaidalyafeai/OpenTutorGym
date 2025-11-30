@@ -1,0 +1,17 @@
+trainer_type: DPO
+seed: 3407
+
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+warmup_steps: 5
+num_train_epochs: 1
+learning_rate: 2e-4
+logging_steps: 1
+optim: adamw_8bit
+weight_decay: 0.01
+lr_scheduler_type: linear
+
+logging_steps: 1
+report_to: "wandb"
+#save_steps: 50
+output_dir: "./outputs/dpo/"

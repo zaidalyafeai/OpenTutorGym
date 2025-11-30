@@ -87,12 +87,13 @@ class TLLM:
 
         return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
 
-    def fine_tune(self, dataset: List[Dict[str, Any]], trainer_config_path: str, peft_config_path: str = None):
-        conversations = dataset.get_dialogue()
-        conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
-        conversations = Dataset.from_list(conversations)
-        print(conversations)
-        
+    def fine_tune(self, dataset: List[Dict[str, Any]], trainer_config_path: str = "./src/configs/sft_config.yaml", peft_config_path: str = "./src/configs/lora_config.yaml"):
+        if 'sft' in trainer_config_path:
+            conversations = dataset.get_dialogue()
+            conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
+            conversations = Dataset.from_list(conversations)
+        else:
+            conversations = dataset        
 
         if peft_config_path:
             peft = PeftModelWrapper(peft_config_path=peft_config_path)

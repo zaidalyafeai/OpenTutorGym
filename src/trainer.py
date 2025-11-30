@@ -14,6 +14,8 @@ from trl import (
     SFTConfig,
     GRPOTrainer,
     GRPOConfig,
+    DPOTrainer,
+    DPOConfig,
 )
 from datasets import Dataset
 from src.Datasets import load_dataset
@@ -26,6 +28,7 @@ PEFT_TYPE_MAP = {
 TRAINER_TYPE_MAP = {
     "SFT": (SFTTrainer, SFTConfig),
     "GRPO": (GRPOTrainer, GRPOConfig),
+    "DPO": (DPOTrainer, DPOConfig),
 }
 
 def load_config_dict(config_path) -> Optional[Dict[str, Any]]:
@@ -123,7 +126,7 @@ def main():
         device_map="auto",
     )
 
-    peft = PeftModelWrapper(peft_config_path="./configs/lora_config.yaml")
+    peft = PeftModelWrapper(peft_config_path="configs/lora_config.yaml")
     model = peft.load_model(base_model)
 
     tokenizer = AutoTokenizer.from_pretrained(
