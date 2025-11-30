@@ -8,7 +8,7 @@ import datasets
 from tqdm import tqdm
 
 from torch.utils.data import Dataset
-import re
+from src.utils import hash_question
 from itertools import islice
 
 from transformers import ImageGPTForCausalImageModeling
@@ -52,20 +52,14 @@ class Conversation:
         out += f"--------------------------------\n"
         return out
 
-def hash_question(question: str) -> str:
-    return hashlib.sha256(question.encode()).hexdigest()
-
 class Dataset:
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 
-
-
-
 # -------------------------------------------- VLMs Datasets --------------------------------------------
 class MathVision(Dataset):
     def __init__(self, split="test"):
-        self.dataset_name = "MathVision"
+        self.dataset_name = "math_vision"
         self.split = split
         self.hf_name = "MathLLMs/MathVision"
         self.dataset = datasets.load_dataset(self.hf_name)[self.split]
@@ -89,7 +83,7 @@ class MathVision(Dataset):
 
 class ScienceQA(Dataset):
     def __init__(self, split="test"):
-        self.dataset_name = "ScienceQA"
+        self.dataset_name = "science_qa"
         self.split = split
         self.hf_name = "derek-thomas/ScienceQA"
         self.dataset = datasets.load_dataset(self.hf_name)[self.split]
@@ -550,9 +544,9 @@ def load_dataset(dataset_name, path_to_json=None):
         return TutorEval()
     elif dataset_name == 'gsm8k':
         return GSM8K()
-    elif dataset_name == 'mathvision':
+    elif dataset_name == 'math_vision':
         return MathVision()
-    elif dataset_name == 'scienceqa':
+    elif dataset_name == 'science_qa':
         return ScienceQA()
     elif dataset_name == 'bioasq':
         return BioASQ()
@@ -568,37 +562,37 @@ def load_dataset(dataset_name, path_to_json=None):
         raise ValueError(f"Dataset {dataset_name} not found")
 
 if __name__ == "__main__":
-    # print('Stepwise Verify')
-    # dataset = load_dataset('stepwise_verify')
-    # print(dataset.conversations[0])
+    print('Stepwise Verify')
+    dataset = load_dataset('stepwise_verify')
+    print(dataset.conversations[0])
 
-    # print('MathDial')
-    # dataset = load_dataset('mathdial')
-    # print(dataset.conversations[0])
+    print('MathDial')
+    dataset = load_dataset('mathdial')
+    print(dataset.conversations[0])
 
-    # print('Bridge')
-    # dataset = load_dataset('bridge')
-    # print(dataset.conversations[0])
+    print('Bridge')
+    dataset = load_dataset('bridge')
+    print(dataset.conversations[0])
 
-    # print('Cima')
-    # dataset = load_dataset('cima')
-    # print(dataset.conversations[0])
+    print('Cima')
+    dataset = load_dataset('cima')
+    print(dataset.conversations[0])
 
-    # print('CoMTA')
-    # dataset = load_dataset('comta')
-    # print(dataset.conversations[0])
+    print('CoMTA')
+    dataset = load_dataset('comta')
+    print(dataset.conversations[0])
 
-    # print('TutorChat')
-    # dataset = load_dataset('tutor_chat')
-    # print(dataset.conversations[0])
+    print('TutorChat')
+    dataset = load_dataset('tutor_chat')
+    print(dataset.conversations[0])
 
-    # print('TutorEval')
-    # dataset = load_dataset('tutor_eval')
-    # dataset = dataset.process_dataset()
+    print('TutorEval')
+    dataset = load_dataset('tutor_eval')
+    dataset = dataset.process_dataset()
 
-    # print('SocraTeach')
-    # dataset = load_dataset('socra_teach')
-    # print(dataset.conversations[0])
+    print('SocraTeach')
+    dataset = load_dataset('socra_teach')
+    print(dataset.conversations[0])
 
     # VLMs Dataset sample
     print('MathVision')
