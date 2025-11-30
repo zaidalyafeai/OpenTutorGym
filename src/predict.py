@@ -13,6 +13,7 @@ import concurrent
 from rich import print
 from src.trainer import PeftModelWrapper, CustomTrainer
 from peft import PeftModel
+import time
 dotenv.load_dotenv()
 
 class JudgeResponse(BaseModel):
@@ -128,30 +129,46 @@ class APILLM:
         print("Backend: ", self.backend)
         print("==================================")
 
-    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
-        """Get response from LLM based on model type"""
-        api_key = ""
-        api_base = ""
+        self.api_key = ""
+        self.api_base = ""
         if self.backend == "openrouter":
-            api_key = os.environ.get("OPENROUTER_API_KEY")
-            api_base = "https://openrouter.ai/api/v1"
+            self.api_key = os.environ.get("OPENROUTER_API_KEY")
+            self.api_base = "https://openrouter.ai/api/v1"
         elif self.backend == "ollama":
-            api_key = "ollama"
-            api_base = f"http://{self.host}:{self.port}/v1"
+            self.api_key = "ollama"
+            self.api_base = f"http://{self.host}:{self.port}/v1"
         elif self.backend == "vllm":
-            api_key = "EMPTY"
-            api_base = f"http://{self.host}:{self.port}/v1"
+            self.api_key = "EMPTY"
+            self.api_base = f"http://{self.host}:{self.port}/v1"
         else:
             raise ValueError(f"Invalid model: {self.model}")
         
-        client = OpenAI(
-            api_key=api_key,
-            base_url=api_base,
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.api_base,
         )
+
+        ## blocking until connection is established
+        while True:
+            try:
+                self.client.chat.completions.create(
+                    model=self.model, 
+                    messages=[{"role": "user", "content": "Hello, how are you?"}],
+                    temperature=0,
+                    max_tokens=1024
+                )
+                break
+            except Exception as e:
+                print(f"Error during API call: {str(e)}")
+                time.sleep(5)
+
+    def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
+        """Get response from LLM based on model type"""
+        
         # print(f"Using model: {model}")
         # print(f"Request contexts: {contexts}")
         try:
-            response = client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=self.model, 
                 messages=contexts,
                 temperature=0,
