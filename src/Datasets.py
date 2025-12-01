@@ -288,6 +288,9 @@ class GSM8K(Dataset):
     
     
 class DialogueDataset:
+    """
+    DialogueDataset class, used to store a list of conversations
+    """
     def __init__(self, conversations = [], subset = 'train'):
         self.subset = subset
         self.conversations = conversations
@@ -304,9 +307,9 @@ class DialogueDataset:
             dialogue = []
             for turn in conversation.dialogue:
                 if flip:
-                    dialogue.append({"role": 'assistant' if turn['role'] == 'student' else 'user', "content": turn['content']})
+                    dialogue.append({"role": 'assistant' if turn['role'] == 'student' or turn['role'] == 'assistant' else 'user', "content": turn['content']})
                 else:
-                    dialogue.append({"role": 'assistant' if turn['role'] == 'tutor' else 'user', "content": turn['content']})
+                    dialogue.append({"role": 'assistant' if turn['role'] == 'tutor' or turn['role'] == 'assistant' else 'user', "content": turn['content']})
             conversations.append(dialogue)
         return conversations
 
