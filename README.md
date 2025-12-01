@@ -59,6 +59,7 @@ We provide multiple examples in the `examples` directory. You can run them using
 4. `evaluate_conversation.py` - Evaluates a conversation using a model
 5. `generate_conversation.py` - Generates a conversation using a model
 6. `generate_conversation_image.py` - Generates a conversation from a vision dataset
+7. `full_example.py` - A full example for synthetic data generation, evaluation, and fine-tuning.
 
 ## License 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
