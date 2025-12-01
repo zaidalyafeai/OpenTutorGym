@@ -1,10 +1,7 @@
-import ollama
 import os
 import dotenv
 from openai import OpenAI
 from typing import List, Dict, Any
-from pydantic import BaseModel
-from typing import Literal
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import os
@@ -18,45 +15,17 @@ from src.utils import image_to_base64
 
 dotenv.load_dotenv()
 
-class JudgeResponse(BaseModel):
-    correctness: Literal[True, False]
-    helpfulness: Literal[True, False]
-    reasoning: str
-
-class ExtractedAnswer(BaseModel):
-    extracted_final_answer: str
-    reasoning: str
-    correct: Literal["yes", "no"]
-    confidence: int
-    strict: Literal[True] # 100% reliability
-
-def get_ollama_models():
-    """Return available models from Ollama and API providers"""
-    models = ["Human"]
-
-    # Get Ollama models
-    try:
-        models_info = ollama.list()
-        if "models" in models_info:
-            # Sort models by size in decreasing order
-            sorted_models = sorted(
-                models_info["models"], key=lambda x: x.get("size", 0), reverse=False
-            )
-            # Extract just the model names from the sorted list
-            models.extend([model["model"] for model in sorted_models])
-    except Exception as e:
-        print(f"Error fetching Ollama models: {e}")
-
-    # Add API models
-    try:
-        models.extend(self.API_LLMS)
-    except Exception as e:
-        print(f"Error adding API models: {e}")
-
-    return models
-
 class TLLM:
+    """
+    Transformer based LLM class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, model_name: str = "google/gemma-3-4B-it"):
+        """
+        Initialize the transformer based LLM.
+        
+        Args:
+            model_name: Name of the model.
+        """
         self.model_name = model_name
         print('loading checkpoint for ', self.model_name)
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -70,6 +39,15 @@ class TLLM:
         print('checkpoint loaded')
 
     def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
+        """
+        Get response from LLM based on model type
+        
+        Args:
+            contexts: List of contexts.
+            
+        Returns:
+            Response from the LLM.
+        """
         text = self.tokenizer.apply_chat_template(
             contexts,
             tokenize=False,
@@ -88,6 +66,14 @@ class TLLM:
         return self.tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
 
     def fine_tune(self, dataset: List[Dict[str, Any]], trainer_config_path: str = "./src/configs/sft_config.yaml", peft_config_path: str = "./src/configs/lora_config.yaml"):
+        """
+        Fine tune the transformer based LLM.
+        
+        Args:
+            dataset: List of datasets.
+            trainer_config_path: Path to the trainer config.
+            peft_config_path: Path to the peft config.
+        """
         if 'sft' in trainer_config_path:
             conversations = dataset.get_dialogue()
             conversations = [{"text": self.tokenizer.apply_chat_template(x, tokenize = False, num_proc=1)} for x in conversations]
@@ -111,6 +97,12 @@ class TLLM:
         return trainer_stats
     
     def save_model(self, checkpoint_path: str):
+        """
+        Save the transformer based LLM.
+        
+        Args:
+            checkpoint_path: Path to the checkpoint.
+        """
         lora_adapter = "./lora_adapter"
         self.peft_model.save_pretrained(lora_adapter, save_adapter=True, save_config=True)
 
@@ -122,8 +114,19 @@ class TLLM:
 
 
 class APILLM:
-
+    """
+    API based LLM class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, model: str = "openai/gpt-4o-mini", port: str = "8787", host: str = "localhost", backend: str = "openrouter"):
+        """
+        Initialize the API based LLM.
+        
+        Args:
+            model: Name of the model.
+            port: Port number.
+            host: Host name.
+            backend: Backend type.
+        """
         self.model = model
         self.port = port
         self.host = host
@@ -166,7 +169,15 @@ class APILLM:
                 time.sleep(5)
 
     def get_llm_response(self, contexts: List[Dict[str, Any]]) -> str:
-        """Get response from LLM based on model type"""
+        """
+        Get response from LLM based on model type
+        
+        Args:
+            contexts: List of contexts.
+            
+        Returns:
+            Response from the LLM.
+        """
         
         # print(f"Using model: {model}")
         # print(f"Request contexts: {contexts}")
@@ -187,7 +198,18 @@ class APILLM:
 
 
 class LLM:
+    """
+    Abstract LLM class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, model_name: str = "google/gemma-3-4B-it", backend: str = "openrouter", **kwargs):
+        """
+        Initialize the LLM.
+        
+        Args:
+            model_name: Name of the model.
+            backend: Backend type.
+            **kwargs: Additional keyword arguments.
+        """
         self.backend = backend
         self.model_name = model_name
         if self.backend in ["openrouter", "ollama", "vllm"]:
@@ -198,6 +220,15 @@ class LLM:
             raise ValueError(f"Invalid backend: {self.backend}")
     
     def get_llm_response(self, contexts: List[Dict[str, Any]]):
+        """
+        Get response from LLM based on model type
+        
+        Args:
+            contexts: List of contexts.
+            
+        Returns:
+            Response from the LLM.
+        """
         return self.model.get_llm_response(contexts)
 
 class LLMGenerator:
@@ -217,7 +248,21 @@ class LLMGenerator:
         max_turns: int = 20,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
-        """Generate a conversation between a student and a tutor"""
+        """
+        Generate a conversation between a student and a tutor
+        
+        Args:
+            question: Question to be asked.
+            image: Image to be used.
+            language: Language of the conversation.
+            student_level: Level of the student.
+            max_turns: Maximum number of turns.
+            log: Whether to log the conversation.
+            
+        Returns:
+            List of contexts.
+        """
+
         # System prompts for each agent
         student_system = f"""You speak in {language}.
         Never forget you are a Student in {student_level} and I am a Tutor. Never flip roles! You will always ask questions, never instruct me or ask me to solve the problem.
@@ -299,7 +344,19 @@ class LLMGenerator:
         max_turns: int = 20,
         log: bool = False,
     ) -> List[Dict[str, Any]]:
-        """Generate a conversation between a student and a tutor"""
+        """
+        Generate a conversation between a student and a tutor
+        
+        Args:
+            question: Question to be asked.
+            language: Language of the conversation.
+            student_level: Level of the student.
+            max_turns: Maximum number of turns.
+            log: Whether to log the conversation.
+            
+        Returns:
+            List of contexts.
+        """
         # System prompts for each agent
         student_system = f"""You speak in {language}.
         Never forget you are a Student in {student_level} and I am a Tutor. Never flip roles! You will always ask questions, never instruct me or ask me to solve the problem.
@@ -366,12 +423,29 @@ class LLMGenerator:
 
 
     def parse_response(self, response: str) -> Dict[str, Any]:
+        """
+        Parse the response from the LLM
+        
+        Args:
+            response: Response from the LLM.
+            
+        Returns:
+            Dict containing reasoning and solution.
+        """
         reasoning = response.split("### reasoning")[1].split("### solution")[0].strip()
         solution = response.split("### solution")[1].strip()
         return {"reasoning": reasoning, "solution": solution}
     
-    def predict_standard(self, example: Dict[str, Any]):
-        """Make a few-shot prediction based on examples"""
+    def predict_standard(self, example: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Make a prediction based on a single example
+        
+        Args:
+            example: Example to be predicted.
+            
+        Returns:
+            Dict containing reasoning and solution.
+        """
         system_prompt = """You are given a question. you need to answer the question step by step. Provide the answer in the following format:
         ### reasoning
         reasoning for the answer
@@ -390,6 +464,15 @@ class LLMGenerator:
         return parsed_response
     
     def process_conversation_examples(self, examples: List[Dict[str, Any]]):
+        """
+        Process conversation examples
+        
+        Args:
+            examples: List of examples.
+            
+        Returns:
+            List of contexts.
+        """
         prompt = """You are a student. You are given a conversation between a student and a tutor that solves a question. 
         Use your knowledge of the conversation to answer the given Question. Answer the question in the following format:
         Reasoning: step by step reasoning to solve the problem
@@ -407,11 +490,30 @@ class LLMGenerator:
         return conversations
     
     def predict_conversation_examples(self, examples: List[Dict[str, Any]], question: str = None):
+        """
+        Predict conversation examples
+        
+        Args:
+            examples: List of examples.
+            question: Question to be asked.
+            
+        Returns:
+            List of contexts.
+        """
         contexts= self.process_conversation_examples(examples)
         contexts.append({"role": "user", "content": "Question: " + question})
         return self.get_llm_response(self.student_model, contexts)
     
     def predict(self, examples: List[Dict[str, Any]]):
+        """
+        Predict examples
+        
+        Args:
+            examples: List of examples.
+            
+        Returns:
+            List of contexts.
+        """
         if "tutor" in self.mode:
             return self.predict_conversation(example)
         elif "standard" in self.mode:

@@ -32,6 +32,15 @@ TRAINER_TYPE_MAP = {
 }
 
 def load_config_dict(config_path) -> Optional[Dict[str, Any]]:
+    """
+    Load a configuration dictionary from a file.
+    
+    Args:
+        config_path: Path to the configuration file.
+        
+    Returns:
+        Optional[Dict[str, Any]]: Configuration dictionary.
+    """
     if not config_path:
         return None
     if not os.path.exists(config_path):
@@ -46,7 +55,16 @@ def load_config_dict(config_path) -> Optional[Dict[str, Any]]:
             raise ValueError("Use .json or .yml/.yaml for PEFT config")
 
 class PeftModelWrapper:
+    """
+    Wrapper for PEFT model.
+    """
     def __init__(self, peft_config_path: Optional[str] = None):
+        """
+        Initialize the PeftModelWrapper.
+        
+        Args:
+            peft_config_path: Path to the PEFT config file.
+        """
         self.peft_config_path = peft_config_path
 
     def _build_peft_config_obj(self, cfg: Dict[str, Any]):
@@ -61,6 +79,15 @@ class PeftModelWrapper:
         return ConfigClass(**cfg)
 
     def load_model(self, model):
+        """
+        Load a PEFT model.
+        
+        Args:
+            model: Base model.
+            
+        Returns:
+            PeftModel: PEFT model.
+        """
         cfg_dict = load_config_dict(self.peft_config_path)
         if cfg_dict:
             peft_config = self._build_peft_config_obj(cfg_dict)
@@ -82,7 +109,21 @@ class PeftModelWrapper:
     
 
 class CustomTrainer:
+    """
+    Custom trainer for training a model.
+    """
     def __init__(self, model, tokenizer, train_dataset, eval_dataset = None, config_path = None, **kwargs):
+        """
+        Initialize the CustomTrainer.
+        
+        Args:
+            model: Base model.
+            tokenizer: Tokenizer.
+            train_dataset: Training dataset.
+            eval_dataset: Evaluation dataset.
+            config_path: Path to the config file.
+            **kwargs: Additional keyword arguments.
+        """
         self.model = model
         self.tokenizer = tokenizer
         self.train_dataset = train_dataset
@@ -94,6 +135,15 @@ class CustomTrainer:
         self.trainer_type = self.cfg_dict.pop("trainer_type").upper()
         
     def _build_trainer_config(self, cfg: Dict[str, Any]):
+        """
+        Build a trainer configuration.
+        
+        Args:
+            cfg: Configuration dictionary.
+            
+        Returns:
+            TrainerConfig: Trainer configuration.
+        """
         _, ConfigClass = TRAINER_TYPE_MAP.get(self.trainer_type, (None, None))
         if ConfigClass is None:
             raise ValueError(f"Unsupported trainer_type '{self.trainer_type}'. "
@@ -102,7 +152,12 @@ class CustomTrainer:
         return ConfigClass(**cfg)
 
     def get_trainer(self):
-
+        """
+        Get a trainer.
+        
+        Returns:
+            Trainer: Trainer.
+        """
         if self.cfg_dict:
             trainer_config = self._build_trainer_config(self.cfg_dict)
             TrainerClass, _ = TRAINER_TYPE_MAP.get(self.trainer_type)

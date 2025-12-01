@@ -5,12 +5,24 @@ from tqdm import tqdm
 from rich import print
 
 class Evaluator:
+    """
+    Evaluator class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, model, metric_names: list[str]):
         self.model = model
         self.metric_names = metric_names
         self.metric = load_metric(metric_names)
     
     def evaluate_conversation(self, contexts: List[Dict[str, Any]]) -> float:
+        """
+        Evaluate a single conversation.
+        
+        Args:
+            contexts: A list of message dicts with 'role' and 'content' keys.
+            
+        Returns:
+            Dict containing metrics for the conversation.
+        """
         content = ""
         for turn in contexts:
             role = "student" if turn['role'] == "user" else "tutor"

@@ -3,17 +3,16 @@ import requests
 from PIL import Image
 import zipfile
 import os
-import hashlib
 import datasets
 from tqdm import tqdm
-
 from torch.utils.data import Dataset
 from src.utils import hash_question
 from itertools import islice
 
-from transformers import ImageGPTForCausalImageModeling
-
 class Problem:
+    """
+    Problem class
+    """
     def __init__(self, text = '', img = None):
         self.text = text
         if img is not None:
@@ -32,6 +31,9 @@ class Problem:
         return f"Problem: {self.text}\n"
 
 class Conversation:
+    """
+    Conversation class
+    """
     def __init__(self, problem:Problem = None, solution = '', topic = '', dialogue = []):
         if problem is None:
             self.problem = Problem()
@@ -53,11 +55,18 @@ class Conversation:
         return out
 
 class Dataset:
+    """
+    Dataset class
+    """
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 
 # -------------------------------------------- VLMs Datasets --------------------------------------------
 class MathVision(Dataset):
+    """
+    MathVision dataset 
+    https://huggingface.co/datasets/MathLLMs/MathVision
+    """
     def __init__(self, split="test"):
         self.dataset_name = "math_vision"
         self.split = split
@@ -82,6 +91,10 @@ class MathVision(Dataset):
         return self.dataset
 
 class ScienceQA(Dataset):
+    """
+    ScienceQA dataset
+    https://huggingface.co/datasets/derek-thomas/ScienceQA
+    """
     def __init__(self, split="test"):
         self.dataset_name = "science_qa"
         self.split = split
@@ -141,6 +154,10 @@ class ScienceQA(Dataset):
 
 # -------------------------------------------- Bio/Medical Datasets --------------------------------------------
 class BioASQ(Dataset):
+    """
+    BioASQ dataset
+    https://huggingface.co/datasets/lucadiliello/bioasqqa
+    """
     def __init__(self, split="test"):
         self.dataset_name = "BioASQ"
         self.split = split
@@ -161,6 +178,10 @@ class BioASQ(Dataset):
         return self.dataset
 
 class MoleculeQA(Dataset):
+    """
+    MoleculeQA dataset
+    https://huggingface.co/datasets/hcaoaf/MoleculeQA
+    """
     def __init__(self, split="test"):
         self.hf_name = "hcaoaf/MoleculeQA"
         self.split = split
@@ -206,7 +227,11 @@ class MoleculeQA(Dataset):
         self.dataset = examples
         return self.dataset
 
-class PubMedQA:
+class PubMedQA(Dataset):
+    """
+    PubMedQA dataset
+    https://huggingface.co/datasets/ncbi/pubmedqa
+    """
     def __init__(self, path_to_json):
         """
         path_to_json: path to the pre-split JSON file, e.g. pqaa_dev_set.json
@@ -245,6 +270,10 @@ class PubMedQA:
 
 # -------------------------------------------- LLMs Datasets QA --------------------------------------------
 class GSM8K(Dataset):
+    """
+    GSM8K dataset
+    https://huggingface.co/datasets/openai/gsm8k
+    """
     def __init__(self, split = "test"):
         self.dataset_name = "gsm8k"
         self.split = split
@@ -282,6 +311,10 @@ class DialogueDataset:
         return conversations
 
 class StepVerify(DialogueDataset):
+    """
+    StepVerify dataset
+    https://github.com/eth-lre/verify-then-generate
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/eth-lre/verify-then-generate/refs/heads/main/dataset/dataset.json'
@@ -295,6 +328,10 @@ class StepVerify(DialogueDataset):
             self.conversations.append(Conversation(problem = Problem(text = item['problem']), solution = item['reference_solution'], topic = item['topic'], dialogue = dialogue))
 
 class MathDial(DialogueDataset):
+    """
+    MathDial dataset
+    https://github.com/eth-nlped/mathdial
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         """
@@ -329,6 +366,10 @@ class MathDial(DialogueDataset):
             self.conversations.append(Conversation(problem = Problem(text = item['question']), solution = item['ground_truth'], topic = item['student_profile'], dialogue = dialogue))
 
 class Bridge(DialogueDataset):
+    """
+    Bridge dataset
+    https://github.com/rosewang2008/bridge
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         if self.subset == 'train':
@@ -351,6 +392,10 @@ class Bridge(DialogueDataset):
             self.conversations.append(Conversation(topic = item['lesson_topic'], dialogue = dialogue))
 
 class Cima(DialogueDataset):
+    """
+    Cima dataset
+    https://github.com/kstats/CIMA
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = "https://raw.githubusercontent.com/kstats/CIMA/refs/heads/master/dataset.json"
@@ -382,6 +427,10 @@ class Cima(DialogueDataset):
             self.conversations.append(Conversation(problem = Problem(img = img_path), dialogue = dialogue, topic = topic))
 
 class CoMTA(DialogueDataset):
+    """
+    CoMTA dataset
+    https://github.com/Khan/tutoring-accuracy-dataset
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Khan/tutoring-accuracy-dataset/refs/heads/main/CoMTA_dataset.json'
@@ -402,6 +451,10 @@ class CoMTA(DialogueDataset):
             self.conversations.append(Conversation(dialogue = dialogue, topic = topic))
 
 class SocraTeach(DialogueDataset):
+    """
+    SocraTeach dataset
+    https://github.com/Ljyustc/SocraticLM
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         path = 'https://raw.githubusercontent.com/Ljyustc/SocraticLM/refs/heads/main/data/SocraTeach_multi.json'
@@ -423,7 +476,8 @@ class SocraTeach(DialogueDataset):
 
 class TutorChat(DialogueDataset):
     """
-    TutorChat – 80 k synthetic teacher–student conversations ⟨hf: princeton‑nlp/TutorChat⟩
+    TutorChat dataset
+    https://github.com/princeton-nlp/TutorChat
     """
     HF_NAME = "princeton-nlp/TutorChat"          
     ROLE_MAP = {"assistant": "tutor",
@@ -463,8 +517,8 @@ class TutorChat(DialogueDataset):
 
 class TutorEval(Dataset):
     """
-    TutorEval – 834 expert‑written questions about long textbook
-    chapters; supports open‑book / closed‑book flags. ⟨hf: princeton‑nlp/TutorEval⟩
+    TutorEval dataset
+    https://github.com/princeton-nlp/TutorEval
     """
     HF_NAME = "princeton-nlp/TutorEval"    
 
@@ -494,8 +548,11 @@ class TutorEval(Dataset):
         return self.dataset  
     
 
-class Book2Dial(Dataset):
-
+class Book2Dial(DialogueDataset):
+    """
+    Book2Dial dataset
+    https://github.com/eth-lre/book2dial
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         base_path = "https://raw.githubusercontent.com/eth-lre/book2dial/refs/heads/main/generated_dataset"
@@ -516,6 +573,10 @@ class Book2Dial(Dataset):
                 self.conversations.append(Conversation(dialogue = dialogue))
 
 class TutorBench(DialogueDataset):
+    """
+    TutorBench dataset
+    https://github.com/eth-lre/tutorbench
+    """
     def __init__(self, subset = 'train'):
         self.subset = subset
         self.dataset = datasets.load_dataset("tutorbench/tutorbench", split = "train")

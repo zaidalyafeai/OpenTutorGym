@@ -1,10 +1,28 @@
 import json
 
 class Metric:
+    """
+    Metric class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, metric_name: str):
+        """
+        Initialize the metric.
+        
+        Args:
+            metric_name: Name of the metric.
+        """
         self.metric_name = metric_name
     
     def parse_response(self, response):
+        """
+        Parse the response from the model.
+        
+        Args:
+            response: Response from the model.
+            
+        Returns:
+            Parsed response.
+        """
         response = response.strip()
 
         # Try to parse as JSON if it looks like JSON
@@ -20,6 +38,15 @@ class Metric:
         return response
         
     def calculate_score(self, response):
+        """
+        Calculate the score for the metric.
+        
+        Args:
+            response: Response from the model.
+            
+        Returns:
+            Score for the metric.
+        """
         parsed_response = self.parse_response(response)
         if parsed_response.lower() == 'yes':
             score = 1
@@ -211,7 +238,16 @@ all_metrics = {
 }
 
 class AggregatedMetric(Metric):
+    """
+    Aggregated metric class, used to evaluate the model on a list of conversations
+    """
     def __init__(self, metrics: list[str]):
+        """
+        Initialize the aggregated metric.
+        
+        Args:
+            metrics: List of metric names.
+        """
         super().__init__('aggregated_metric')
         self.metrics = metrics
         self.system_prompt = ""
@@ -225,11 +261,29 @@ class AggregatedMetric(Metric):
         {output_json}
         """
     def fix_json(self, response: str):
+        """
+        Fix the JSON response.
+        
+        Args:
+            response: Response from the model.
+            
+        Returns:
+            Fixed JSON response.
+        """
         response = response.replace("```", "")
         response = response.replace("json", "")
         return response
 
     def calculate_score(self, response: str):
+        """
+        Calculate the score for the aggregated metric.
+        
+        Args:
+            response: Response from the model.
+            
+        Returns:
+            Score for the aggregated metric.
+        """
         try:
             fixed_response = self.fix_json(response)
             response = json.loads(fixed_response)
@@ -239,6 +293,15 @@ class AggregatedMetric(Metric):
             return {metric_name: 0.0 for metric_name in self.metrics}
     
 def load_metric(metric_names: list[str]):
+    """
+    Load the metric.
+    
+    Args:
+        metric_names: List of metric names.
+        
+    Returns:
+        Metric object.
+    """
     if len(metric_names) > 1:
         return AggregatedMetric(metric_names)
     return all_metrics[metric_names[0]]        
