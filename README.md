@@ -31,9 +31,6 @@ To use the OpenRouter backend, you need to have a valid key from OpenRouter. You
 ### Transformers
 The transformers library is enabled by default when you install the dependencies.
 
-## Examples 
-We provide multiple examples in the `examples` directory. You can run them using `uv run <example_name>`
-
 ## Data generation
 
 To generate data, you can use the `scripts/generate.slurm` script. It will generate data using the specified model and save it to the specified directory.
