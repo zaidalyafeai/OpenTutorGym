@@ -1,13 +1,12 @@
 import matplotlib.pyplot as plt
 import json
 import numpy as np
+import glob
 
-files = ["conversations_Falcon3-7B-Instruct.json", 
-         "conversations_Qwen2.5-7B-Instruct.json", 
-         "conversations_Llama-3.1-8B-Instruct.json"]
+files = glob.glob("examples/conversations_*.json")
 
 # Define colors for each model
-colors = ['skyblue', 'lightgreen', 'salmon']
+colors = ['skyblue', 'lightgreen', 'salmon','orange']
 model_names = []
 all_lengths = []
 
