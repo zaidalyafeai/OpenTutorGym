@@ -6,6 +6,11 @@ OpenTutorGym is an open framework for training and evaluating math tutors. It su
 - [x] Training math tutors using LLMs using supervised finetuning and preference optimization
 - [x] Evaluating math tutors using LLM-as-a-Judge
 
+Our framework follows a modular design:
+
+<img src="assets/pipeline.png" alt="Pipeline" style="display: block; margin: 0 auto;">
+ 
+
 ## Installation
 
 This repository uses `uv` as a package manager. You can install it using `curl`
