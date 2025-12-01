@@ -19,7 +19,7 @@ This repository uses `uv` as a package manager. You can install it using `curl`
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-After installing `uv`, you can initialize the project using `uv init`. The install all the dependencies using `uv install`.
+After installing `uv`, you can intall the dependencies using `uv sync`.
 
 ## Backends
 
