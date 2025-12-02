@@ -185,7 +185,6 @@ class APILLM:
             response = self.client.chat.completions.create(
                 model=self.model, 
                 messages=contexts,
-                temperature=0,
                 max_tokens=1024
             )
             
